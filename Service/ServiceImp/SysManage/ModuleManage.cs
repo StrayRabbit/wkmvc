@@ -27,6 +27,10 @@ namespace Service.ServiceImp
             //权限转模块
             if (permission != null)
             {
+                permission.Select(new Func<Domain.SYS_PERMISSION, Domain.SYS_MODULE>(delegate(Domain.SYS_PERMISSION p)
+                {
+                    return p.SYS_MODULE;
+                }));
                 permodule.AddRange(permission.Select(p => p.SYS_MODULE));
                 //去重
                 permodule = permodule.Distinct(new ModuleDistinct()).ToList();
