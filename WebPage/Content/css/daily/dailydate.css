@@ -1,0 +1,25 @@
+﻿.f-day-header{height:40px;line-height:40px;color:#ed5564;border-top: 5px solid #ed5564;}
+.f-day-header .f-day-tab a{display:inline-block;padding:0 30px;color:#ed5564}
+.f-day-header .f-day-tab a.cur{background-color:#db4453;color:#fff}
+.f-day-header i{font-size: 15px;margin-top: -5px;margin-right:5px}
+.f-week{height:38px;background-color:#494A4A;position:relative}
+.f-week span{display:inline-block;width:14.2%;line-height:38px;color:#FFF;text-align:center}
+.f-week .l-go,.f-week .r-go{width:38px;height:38px;display:none;position:absolute;text-align:center;line-height:38px;color:#FFF;background-color:#494A4A;top:0}
+.f-week:hover .l-go,.f-week:hover .r-go{display:block}
+.f-week .r-go{right:0}
+.f-date{overflow:hidden;border:1px solid #CCC;}
+.f-date .f-dayitem{width:14.28%;float:left;position:relative;height:120px;border:1px solid #CCC;margin-top:-1px;padding:5px;border-left:none;text-align:center;cursor:pointer}
+.f-date .f-dayitem:nth-child(7n){border-right:none;}
+.f-date .f-dayitem span{position:absolute;right:7px;top:5px}
+.f-date .f-dayitem p{font-size:12px;padding:0 0 0 10px;display:inline-block;background-color:#ed5564;color:#fff}
+.f-date .f-dayitem.cur{background-color:#f7f8fa;cursor:default}
+.f-date .f-dayitem p tt{display:inline-block;background-color:#02b7fe;padding:5px 10px;margin-left:10px}
+.f-date .f-dayitem div{padding-top:18%;margin:0 auto}
+.f-date .f-dayitem div a,.f-date .f-dayitem div .btn-sign{display:inline-block;padding:5px 10px;font-size:12px;border:1px dashed #ccc;outline:none;background:#fff;color:#1ab394}
+.f-date .f-dayitem div a:hover,.f-date .f-dayitem div .btn-sign:hover{background:#ed5564;color:#fff;border:1px dashed #ed5564;}
+.f-date .f-dayitem div span{position:relative;display:inline-block;padding:5px 10px;font-size:12px;color:#ed5564}
+.f-date .f-dayitem div span i{margin:0 5px;}
+.f-date .f-dayitem div span.warning{color:#999}
+.f-date .f-dayitem div span.warning i{color:#ed5564}
+.f-date .f-dayitem div span.success{color:#1ab394}
+.f-date .f-dayitem div span.success i{color:#1ab394}

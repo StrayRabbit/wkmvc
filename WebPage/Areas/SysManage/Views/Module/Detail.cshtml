@@ -1,0 +1,226 @@
+﻿@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Domain.SYS_MODULE
+
+<style type="text/css">
+    .gray-bg {
+        background-color: white;
+    }
+
+    .changeicon {
+        float: right;
+        margin-right: -52px;
+        border: none;
+        background-color: #18a689;
+        color: #FFFFFF;
+        height: 34px;
+        margin-top: -7px;
+    }
+
+    .removeicon {
+        background-color: #f8ac59;
+        float: right;
+        margin-right: -92px;
+        border: none;
+        color: #FFFFFF;
+        height: 34px;
+        margin-top: -7px;
+    }
+</style>
+
+@using (Ajax.BeginForm("Save", null, new AjaxOptions()
+{
+    HttpMethod = "Post",
+    OnBegin = "SubAjax.Loading",
+    OnComplete = "SubAjax.Complate",
+    OnFailure = "SubAjax.Failure",
+    OnSuccess = "SubAjax.Success"
+},
+new { @class = "form-horizontal dig-from", @role = "form" }))
+{
+    @Html.HiddenFor(p => p.ID);
+    @Html.HiddenFor(p => p.CREATEDATE);
+    @Html.HiddenFor(p => p.CREATEUSER);
+
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="ibox-detail-title">
+                <i class="fa fa-pencil-square-o"></i>添加/修改模块
+            </div>
+            <div class="ibox-content">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">所属系统：</label>
+                    <div class="col-sm-10">
+                        <select id="FK_BELONGSYSTEM" name="FK_BELONGSYSTEM" class="form-control input-sm  input-s-sm inline">
+                            @*@{foreach (var item in ViewData["Systemlist"] as dynamic)
+                                {
+                                    <option value="@item.ID" @(Model.FK_BELONGSYSTEM == item.ID ? "selected=\"selected\"" : "")>@item.NAME</option>
+                                }}*@
+
+                            @{foreach (var item in ViewData["Systemlist"] as dynamic)
+                            {
+                                <option value="@item.ID" @(Model.FK_BELONGSYSTEM == item.ID) ?"selected='selected' ":" ">@item.NAME</option>
+                            }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">上级模块：</label>
+                    <div class="col-sm-10">
+                        @Html.Hidden("parentmodule", Model.PARENTID)
+                        <select id="PARENTID" name="PARENTID" class="form-control input-sm  inline input-s-lg">
+                            @*@{foreach (var item in ViewData["Modules"] as dynamic)
+                                {
+                                    <option value="@item.ID" @(Model.PARENTID == item.ID ? "selected=\"selected\"" : "")>@item.MODULENAME.Replace("&nbsp;", "　")</option>
+                                }
+                                }*@
+
+                            @{foreach (var item in ViewData["Modules"] as dynamic)
+                            {
+                                <option value="@item.ID" @(Model.PARENTID == item.ID ? "selected='selected'" : "")>@item.MODULENAME.Replace("&nbsp;", "　")</option>
+                            }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">模块名称：</label>
+                            <div class="col-sm-8">
+                                @Html.TextBoxFor(p => p.NAME, new { @class = "form-control", @placeholder = "请输入模块名称", @datatype = "*1-100", @nullmsg = "请输入模块名称！", @errormsg = "请输入模块名称！" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">排序值：</label>
+                            <div class="col-sm-8">
+                                @Html.TextBoxFor(p => p.SHOWORDER, new { @class = "form-control", @placeholder = "请输入模块排序值", @datatype = "n", @nullmsg = "请输入模块排序值", @errormsg = "只能输入数字" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">图标：</label>
+                            <div class="col-sm-8">
+                                <span id="icon" class="form-control input-s-sm">
+                                    @Html.Hidden("ICON", Model.ICON)
+                                    <a class="btn btn-primary btn-xs"><i class="@Model.ICON"></i></a>
+                                    <button class="changeicon" type="button">
+                                        选择
+                                    </button>
+                                    <button class="removeicon" type="button">
+                                        移除
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">模块别名：</label>
+                            <div class="col-sm-8">
+                                @Html.TextBoxFor(p => p.ALIAS, new { @class = "form-control", @placeholder = "请输入模块别名", @datatype = "s1-20", @nullmsg = "请输入模块别名！", @errormsg = "模块别名不能包含中文！" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">是否显示：</label>
+                            <div class="col-sm-8">
+                                <label class="jswitch_line">
+                                    @Html.CheckBoxFor(model => model.ISSHOW, new { @class = "js-switch" })
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">模块类型：</label>
+                    <div class="col-sm-10">
+                        @{ string[] str = ViewData["ModuleType"] as string[];
+                         for (int i = 0; i < str.Length; i++)
+                         {
+                            <label class="icheck_line">
+                                <input type="radio" name="MODULETYPE" value="@(i+1)" @(Model.MODULETYPE == i + 1 ? "checked" : "") class="icheck_box">@str[i]
+                            </label>
+                         }
+                        }
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">模块路径：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(p => p.MODULEPATH, new { @class = "form-control", @placeholder = "请输入模块路径" })
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                    <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section scripts{
+    <script type="text/javascript">
+        //更换父模块
+        function changeModule(s) {
+            $.post('/Sys/Module/FindParnetModule', { s: s }, function (json) {
+                var parentid = $('#parentmodule').val();
+                if (json != '') {
+                    var html = $('#PARENTID');
+                    html.html('<option value="0"><i class="im-plus"></i>一级模块</option>');
+                    for (var i = 0; i < json.length; i++) {
+                        if (json[i].ID == parentid) {
+                            html.append('<option value=\'' + json[i].ID + '\' selected="selected">' + json[i].NAME + '</option>');
+
+                        } else {
+                            html.append('<option value=\'' + json[i].ID + '\'>' + json[i].NAME + '</option>');
+                        }
+                    }
+                }
+            }, 'json');
+        }
+        $(function () {
+            $('.form-horizontal').initValidform();
+            //初始加载
+            if ($('#FK_BELONGSYSTEM').val() != '') {
+                changeModule($('#FK_BELONGSYSTEM').val());
+            }
+            //添加时加载无页面
+            if ($('#ID').val() == '') {
+                $('input[name="MODULETYPE"]').eq(0).prop('checked', true);
+            }
+            //切换模块
+            $('#FK_BELONGSYSTEM').change(function () {
+                changeModule($('#FK_BELONGSYSTEM').val());
+            });
+            //移除图标
+            $('.removeicon').click(function () {
+                $('#icon').find('a>i').attr('class', '');
+                $('#ICON').val('');
+            });
+            //选择图标
+            $('.changeicon').click(function () {
+                var oldicon = $('#icon').find('a>i');
+                top.dialog({
+                    title: '选择图标',
+                    url: '/Sys/Module/ShowIcon',
+                    width: 700,
+                    height: 380,
+                    data: oldicon.attr('class'), // 给 iframe 的数据
+                    onclose: function () {
+                        this.returnValue && oldicon.attr('class', this.returnValue) && $('#ICON').val(this.returnValue);
+                    },
+                    oniframeload: function () {
+                    }
+                }).showModal();
+                return false;
+            });
+        });
+    </script>
+}

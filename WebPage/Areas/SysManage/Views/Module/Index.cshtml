@@ -1,0 +1,140 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model dynamic
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>模块管理</h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-primary btn-xs p210" id="insert" action="add"><i class="fa fa-plus-circle fa-fw"></i> 创建新模块</a>
+                        <a class="btn btn-warning btn-xs p210" id="modify" action="edit"><i class="fa fa-pencil fa-fw"></i> 编辑</a>
+                        <a class="btn btn-danger btn-xs p210" id="delete" action="remove"><i class="fa fa-trash-o fa-fw"></i> 删除</a>
+                        <a class="reload-link" style="color: #c4c4c4" href="javascript:dig.reload()" data-toggle="tooltip" data-placement="left" title="刷新">
+                            <i class="fa fa-repeat fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    @using (Ajax.BeginForm("Index", null, new AjaxOptions() { }, new { @id = "form1", @class = "form-horizontal", @method = "get" }))
+                    {
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <label>选择系统：</label>
+                                <select name="System" class="form-control input-sm  input-s-sm inline" onchange="submit()">
+                                    <option value="" @(ViewData["System"] == null || ViewData["System"].ToString() == "" ? "selected=\"selected\"" : "")>全部系统</option>
+                                    @{
+                                        foreach (var item in ViewData["Systemlist"] as dynamic)
+                                        {
+                                            <option value="@item.ID" @(ViewData["System"] != null && ViewData["System"].ToString() != "" && ViewData["System"].ToString() == item.ID ? "selected=\"selected\"" : "")>@item.NAME</option>
+                                        }
+                                    }
+                                </select>
+
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    @Html.TextBox("Search", null, new { @class = "input-sm form-control", @placeholder = "请输入查询关键词" })
+                                    <span class="input-group-btn">
+                                        <button type="submit" onclick="submit()" class="btn btn-sm btn-primary"> 搜索</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <table id="dataTable" class="table table-striped table-bordered table-hover dataTables-example" style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <th class="tn" style="width: 50px !important"><input name="checkall" class="icheck_box" type="checkbox" value=""></th>
+                                    <th>所属系统</th>
+                                    <th>模块名称</th>
+                                    <th style="width: 100px !important;">模块别名</th>
+                                    <th style="width:100px !important;">模块类型</th>
+                                    <th>模块地址</th>
+                                    <th style="width: 100px !important;">状态/顺序</th>
+                                    <th style="width: 120px !important;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="tn"><input name="checkbox_name" class="icheck_box" type="checkbox" value="@item.ID"></td>
+                                        <td>@item.SYSNAME</td>
+                                        <td style="text-align:left">
+                                            <a href="javascript:EditModule('@item.ID')" listaction="detail" data-toggle="tooltip" data-placement="right" title="修改"><i class="@item.ICON"></i> @Html.Raw(item.MODULENAME)</a>
+                                        </td>
+                                        <td>@item.ALIAS</td>
+                                        <td>@item.MODULETYPE</td>
+                                        <td>@item.MODULEPATH</td>
+                                        <td>@item.ISSHOW/@item.SHOWORDER</td>
+                                        <td style="text-align:center;">
+                                            <a href="javascript:AddChild('@item.ID','@item.FK_BELONGSYSTEM')" listaction="addchild" class="text-navy" title="添加子模块">[添加子模块]</a>
+                                        </td>
+                                    </tr>
+                                }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            //添加新模块
+            $("#insert").click(function () {
+                dig.addPage("添加新模块", "/sys/module/detail", 1000, 450, function () {
+                    if (this.returnValue == 'yes') {
+                        location.reload();
+                    }
+                });
+            });
+            //列表选择修改
+            $('#modify').click(function () {
+                var vals = '';
+                var num = 0;
+                $('input[name="checkbox_name"]:checked').each(function () {
+                    vals = $(this).val();
+                    num++;
+                });
+                if (!vals) {
+                    dig.error("对不起，请选中您要操作的记录！");
+                    return;
+                }
+                if (num > 1) {
+                    dig.error("对不起，每次只能修改一条记录！");
+                    return;
+                }
+                dig.addPage("编辑模块", "/Sys/Module/detail/" + vals, 700, 450, function () {
+                    if (this.returnValue == 'yes') {
+                        location.reload();
+                    }
+                });
+            });
+        });
+        //添加子模块
+        function AddChild(n, e) {
+            dig.addPage("添加子模块", "/sys/module/detail?parentId=" + n + "&sys=" + e, 1000, 450, function () {
+                if (this.returnValue == 'yes') {
+                    location.reload();
+                }
+            });
+        }
+        //跳转修改
+        function EditModule(n) {
+            dig.addPage("编辑模块", "/sys/module/detail/" + n, 1000, 450, function () {
+                if (this.returnValue == 'yes') {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+}
+

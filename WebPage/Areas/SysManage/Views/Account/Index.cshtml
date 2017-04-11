@@ -1,0 +1,100 @@
+﻿@{
+    Layout = null;
+}
+@model Domain.SYS_USER
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台登录</title>
+    <!--[if IE]>
+        <script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+    <![endif]-->
+    <link href="/Content/css/login/login.css" rel="stylesheet" />
+</head>
+<body id="loginBody">
+    <div class="login">
+        <div class="login_logo">
+            <img src="/Content/images/login/login_top_tip.png" />
+        </div>
+        <div class="login_fields">
+            @using (Ajax.BeginForm("login", null, new AjaxOptions()
+                        {
+                            HttpMethod = "Post",
+                            OnBegin = "dig.Loading",
+                            OnSuccess = "dig.Success",
+                            OnFailure = "dig.Failure",
+                            OnComplete = "dig.Complete"
+                        }, new { @class = "form-signin" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.TextBoxFor(model => model.ACCOUNT,
+                                                        new
+                                                        {
+                                                            @placeholder = "用户名",
+                                                            @maxlength = 15,
+                                                            @datatype = "*",
+                                                            @nullmsg = "请输入用户名！",
+                                                            @errormsg = "请输入用户名！",
+                                                            @required = "required",
+                                                            @autocomplete = "off",
+                                                            @Value="admin"
+                                                        })
+                @Html.PasswordFor(model => model.PASSWORD,
+                                                        new
+                                                        {
+                                                            @placeholder = "密码",
+                                                            @maxlength = 12,
+                                                            @datatype = "*",
+                                                            @nullmsg = "请输入密码！",
+                                                            @errormsg = "请输入密码！",
+                                                            @required = "required",
+                                                            @autocomplete = "off",
+                                                            @value="admin"
+                                                        })
+                <div class="from_control">
+                    @Html.TextBox("code", "",
+                                                        new
+                                                        {
+                                                            @class = "form-control",
+                                                            @placeholder = "请输入验证码",
+                                                            @datatype = "*",
+                                                            @nullmsg = "请输入验证码！",
+                                                            @maxlength = 4,
+                                                            //@required = "required",
+                                                            @autocomplete = "off"
+                                                        })
+                    <div class="code-img">
+                        <img id="imgVerify" src="/Sys/Account/ValidateCode" alt="看不清？点击更换" onclick="this.src = this.src + '?'" style="vertical-align:middle;" />
+                    </div>
+                </div>
+                <div class="login_fields_submit">
+                    <button type="submit">登录</button>
+                </div>
+            }
+        </div>
+        <div class="success">
+            <h1>认证失败</h1>
+            <p></p>
+            <p class="login_fields_resubmit">
+                <a href="javascript:dig.Back();">重新登录</a>
+            </p>
+        </div>
+        <div class="copyright">
+            Copyright © 果冻布丁喜之郎
+        </div>
+    </div>
+    <div class="authent">
+        <img src="/Content/images/login/puff.svg" />
+        <p>身份认证中</p>
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="/Content/js/jquery.min.js"></script>
+<script type="text/javascript" src="/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript" src="/Content/js/login/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/Content/js/login/stopExecutionOnTimeout.js"></script>
+<script type="text/javascript" src="/Content/js/login/sketch.min.js"></script>
+<script type="text/javascript" src="/Content/js/login/login.min.js"></script>

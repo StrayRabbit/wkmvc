@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/css/animate.min.css" rel="stylesheet" />
+    <link href="/Content/css/sweetalert.css" rel="stylesheet" />
+    <link href="/Content/css/style.min.css" rel="stylesheet" />
+    <link href="/Content/css/admin/skins/minimal/red.css" rel="stylesheet" />
+    <link href="/Content/js/switchery/switchery.min.css" rel="stylesheet" />
+    <link href="/Content/js/select2/select2.css" rel="stylesheet" />
+    <link href="/Content/css/toastr/toastr.min.css" rel="stylesheet" />
+</head>
+<body class="gray-bg">
+    <div class="spiner-example">
+        <div class="sk-spinner sk-spinner-cube-grid">
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+            <div class="sk-cube"></div>
+        </div>
+    </div>
+    @RenderBody()
+</body>
+</html>
+<script type="text/javascript" src="/Content/js/jquery.min.js"></script>
+<script type="text/javascript" src="/Content/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/datatables/colResizable-1.5.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/icheck.min.js"></script>
+<script type="text/javascript" src="/Content/js/sweetalert.min.js"></script>
+<script type="text/javascript" src="/Content/js/jquery.validateform.js"></script>
+<script type="text/javascript" src="/Content/js/dialog-plus-min.js"></script>
+<script type="text/javascript" src="/Content/js/switchery/switchery.min.js"></script>
+<script type="text/javascript" src="/Content/js/select2/select2.min.js"></script>
+<script type="text/javascript" src="/Content/js/laydate/laydate.js"></script>
+<script type="text/javascript" src="/Content/js/toastr/toastr.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/common.js"></script>
+<script type="text/javascript">
+    $(function () {
+        VaildatePermission(@Html.Raw(ViewData["PermissionList"]));
+    });
+</script>
+@RenderSection("scripts", required: false)

@@ -1,0 +1,183 @@
+﻿@{
+    ViewBag.Title = "Index";
+    var ModuleList = ViewData["Module"] as List<Domain.SYS_MODULE>;
+    Layout = null;
+}
+@model Service.Account
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title>信息管理平台</title>
+    <!--[if lt IE 8]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/css/animate.min.css" rel="stylesheet" />
+    <link href="/Content/css/style.min.css" rel="stylesheet" />
+    <link href="/Content/css/dialog/ui-dialog.css" rel="stylesheet" />
+    <link href="/Content/css/sweetalert.css" rel="stylesheet" />
+    <link href="/Content/css/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="/Content/js/switchery/switchery.min.css" rel="stylesheet" />
+</head>
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden">
+    <div id="wrapper">
+        <!--左侧导航开始-->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="nav-close">
+                <i class="fa fa-times-circle"></i>
+            </div>
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <span><img alt="image" class="img-circle" src="@(string.IsNullOrEmpty(Model.Face_Img) ? "/Pro/Project/User_Default_Avatat?name="+Model.Name.Substring(0,1) : Model.Face_Img)" style="width:64px;height:64px;" /></span>
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <span class="clear">
+                                    <span class="block m-t-xs"><strong class="font-bold">@Model.Name</strong></span>
+                                    @*<span class="text-muted text-xs block">@(Model.DptInfo == null ? Model.Roles.FirstOrDefault().ROLENAME : Model.DptInfo.NAME + " - " + new Models.CommonHelper().GetUserZW(Model.Levels))<b class="caret"></b></span>*@
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu animated fadeInLeft m-t-xs">
+                                <li>
+                                    <a class="J_menuItem" href="/Sys/User/UserFace">修改头像</a>
+                                </li>
+                                <li>
+                                    <a class="J_menuItem" href="/Sys/User/UserInfo">个人资料</a>
+                                </li>
+                                <li>
+                                    <a class="J_menuItem" href="contacts.html">联系我们</a>
+                                </li>
+                                <li>
+                                    <a class="J_menuItem" href="/mail/mail">邮箱</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="javascript:dig.logout();">安全退出</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="logo-element">
+                            GD
+                        </div>
+                    </li>
+                    @{
+                        if (ModuleList != null && ModuleList.Count > 0)
+                        {
+                            foreach (var module in ModuleList.FindAll(p => p.LEVELS == 0 && p.ISSHOW).OrderBy(p => p.SHOWORDER))
+                            {
+                                @Html.Raw(new Models.CommonHelper().GetModuleMenu(module, ModuleList))
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </nav>
+        <!--左侧导航结束-->
+        <!--右侧部分开始-->
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-left">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="javascript:void(0)"><i class="fa fa-bars"></i> </a>
+                    </div>
+                    <ul id="J_Nav" class="nav navbar-top-links navbar-left">
+                        @{
+                            if (ModuleList != null && ModuleList.Count > 0)
+                            {
+                                foreach (var module in ModuleList.FindAll(p => p.LEVELS == 0 && p.ISSHOW).OrderBy(p => p.SHOWORDER))
+                                {
+                                    <li data-id="@module.ALIAS" class="@(module == ModuleList.FindAll(p => p.LEVELS == 0 && p.ISSHOW).OrderBy(p => p.SHOWORDER).FirstOrDefault()?"selected":"")"><a href="javascript:void(0)"><i class="@module.ICON"></i><span>@module.NAME</span></a></li>
+                                }
+                            }
+                        }
+                    </ul>
+                    <div class="curBg" style="left: 0px; width: 68px; display: block;"></div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-envelope"></i> 
+                                @*@Html.Raw(MailInbox != null && MailInbox.Count > 0 ? "<span class=\"label label-warning\">" + MailInbox.Count + "</span>" : "")*@
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-bell"></i> <span class="label label-primary">
+                                @*@(MissionList != null ? MissionList.Count : 0)*@
+                                </span>
+                            </a>
+                        </li>
+                        @*<li class="dropdown hidden-xs">*@
+                        <li class="dropdown">
+                            <a class="right-sidebar-toggle" aria-expanded="false">
+                                <i class="fa fa-tasks"></i> 事项
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row content-tabs">
+                <button class="roll-nav roll-left J_tabLeft">
+                    <i class="fa fa-backward"></i>
+                </button>
+                <nav class="page-tabs J_menuTabs">
+                    <div class="page-tabs-content">
+                        <a href="javascript:;" class="active J_menuTab" data-id="/sys/home/default">首页</a>
+                    </div>
+                </nav>
+                <button class="roll-nav roll-right J_tabRight">
+                    <i class="fa fa-forward"></i>
+                </button>
+                <div class="btn-group roll-nav roll-right">
+                    <button class="dropdown J_tabClose" data-toggle="dropdown">
+                        关闭操作<span class="caret"></span>
+                    </button>
+                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                        <li class="J_tabShowActive">
+                            <a>定位当前选项卡</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="J_tabCloseAll">
+                            <a>关闭全部选项卡</a>
+                        </li>
+                        <li class="J_tabCloseOther">
+                            <a>关闭其他选项卡</a>
+                        </li>
+                    </ul>
+                </div>
+                <a href="javascript:dig.logout();" class="roll-nav roll-right J_tabExit"><i class="fa fa fa-sign-out"></i> 退出</a>
+            </div>
+            <div class="row J_mainContent" id="content-main">
+                <iframe class="J_iframe" name="iframe0" style="width:100%;height:100%;" src="/sys/home/default" frameborder="0" data-id="/sys/home/default" seamless></iframe>
+            </div>
+            <div class="footer">
+                <div class="pull-right">
+                    &copy; 2016 <a href="http://yuangang.cnblogs.com" target="_blank">果冻布丁喜之郎</a>
+                </div>
+            </div>
+        </div>
+        <!--右侧部分结束-->
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="/Content/js/jquery.min.js"></script>
+<script type="text/javascript" src="/Content/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/Content/js/jquery.metisMenu.js"></script>
+<script type="text/javascript" src="/Content/js/jquery.slimscroll.min.js"></script>
+<script type="text/javascript" src="/Content/js/system.min.js"></script>
+<script type="text/javascript" src="/Content/js/nprogress.js"></script>
+<script type="text/javascript" src="/Content/js/dialog-plus-min.js"></script>
+<script type="text/javascript" src="/Content/js/contabs.min.js"></script>
+<script type="text/javascript" src="/Content/js/sweetalert.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/icheck.min.js"></script>
+<script type="text/javascript" src="/Content/js/select2/select2.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/datatables/colResizable-1.5.min.js"></script>
+<script type="text/javascript" src="/Content/js/laydate/laydate.js"></script>
+<script type="text/javascript" src="/Content/js/toastr/toastr.min.js"></script>
+<script type="text/javascript" src="/Content/js/switchery/switchery.min.js"></script>
+<script type="text/javascript" src="/Content/js/admin/common.js"></script>
