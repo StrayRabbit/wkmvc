@@ -20,9 +20,6 @@ namespace WebPage.Areas.SysManage.Controllers
             //获取系统模块列表（如果用bui可以写个方法输出Json给BUI）
             ViewData["Module"] = ModuleManage.GetModule(this.CurrentUser.Id, this.CurrentUser.Permissions, this.CurrentUser.System_Id);
             return View(this.CurrentUser);
-
-            var ModuleList = ViewData["Module"] as List<Domain.SYS_MODULE>;
-            
         }
     }
 }
