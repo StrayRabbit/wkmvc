@@ -49,6 +49,5 @@ D:\GitHub\wkmvc\Domain\bin\Debug\Spring.Web.Mvc5.pdb
 D:\GitHub\wkmvc\Domain\bin\Debug\Spring.Web.Mvc5.xml
 D:\GitHub\wkmvc\Domain\bin\Debug\zh-Hans\EntityFramework.resources.dll
 D:\GitHub\wkmvc\Domain\bin\Debug\zh-Hans\EntityFramework.SqlServer.resources.dll
-D:\GitHub\wkmvc\Domain\obj\Debug\Domain.csprojResolveAssemblyReference.cache
 D:\GitHub\wkmvc\Domain\obj\Debug\Domain.dll
 D:\GitHub\wkmvc\Domain\obj\Debug\Domain.pdb

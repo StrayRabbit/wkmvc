@@ -35,6 +35,5 @@ D:\GitHub\wkmvc\Common\bin\Debug\Spring.Web.pdb
 D:\GitHub\wkmvc\Common\bin\Debug\Spring.Web.xml
 D:\GitHub\wkmvc\Common\bin\Debug\Spring.Web.Mvc5.pdb
 D:\GitHub\wkmvc\Common\bin\Debug\Spring.Web.Mvc5.xml
-D:\GitHub\wkmvc\Common\obj\Debug\Common.csprojResolveAssemblyReference.cache
 D:\GitHub\wkmvc\Common\obj\Debug\Common.dll
 D:\GitHub\wkmvc\Common\obj\Debug\Common.pdb
