@@ -51,3 +51,4 @@ D:\GitHub\wkmvc\Domain\bin\Debug\zh-Hans\EntityFramework.resources.dll
 D:\GitHub\wkmvc\Domain\bin\Debug\zh-Hans\EntityFramework.SqlServer.resources.dll
 D:\GitHub\wkmvc\Domain\obj\Debug\Domain.dll
 D:\GitHub\wkmvc\Domain\obj\Debug\Domain.pdb
+D:\GitHub\wkmvc\Domain\obj\Debug\Domain.csprojResolveAssemblyReference.cache
