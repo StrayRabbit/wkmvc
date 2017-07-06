@@ -180,7 +180,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.Config" />
+    <None Include="App.Config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <EntityDeploy Include="Sql_Wkdb.edmx">
       <Generator>EntityModelCodeGenerator</Generator>

@@ -44,3 +44,5 @@ D:\GitHub\wkmvc\Service\bin\Debug\Spring.Web.Mvc5.xml
 D:\GitHub\wkmvc\Service\obj\Debug\Service.csprojResolveAssemblyReference.cache
 D:\GitHub\wkmvc\Service\obj\Debug\Service.dll
 D:\GitHub\wkmvc\Service\obj\Debug\Service.pdb
+D:\GitHub\wkmvc\Service\bin\Debug\Microsoft.Web.Infrastructure.dll
+D:\GitHub\wkmvc\Service\bin\Debug\Microsoft.Web.Infrastructure.xml
