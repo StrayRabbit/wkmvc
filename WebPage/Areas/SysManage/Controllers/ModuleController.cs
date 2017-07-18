@@ -169,6 +169,7 @@ namespace WebPage.Areas.SysManage.Controllers
                         return Json(json);
                     }
 
+
                     if (this.ModuleManage.SaveOrUpdate(entity, isEdit))
                     {
                         json.Status = "y";
