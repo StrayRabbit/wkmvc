@@ -1,0 +1,67 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="/Content/css/jsTree/style.min.css" rel="stylesheet" />
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-3 col-xs-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content mailbox-content">
+                    <div class="file-manager">
+                        <select id="sel-system" class="form-control" style="background-color: #1ab394; border-color: #1ab394; color: #FFF;border-radius:3px;">
+                            @{
+                                foreach (var item in ViewData["Systemlist"] as dynamic)
+                                {
+                                    <option value="@item.ID">@item.NAME</option>
+                                }
+                            }
+                        </select>
+                        <div class="space-25"></div>
+                        <div id="ModuleTree">
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 col-xs-12">
+            <iframe src="" style="width:100%;" id="DeployBase" name="DeployBase" frameborder="0" scrolling="auto" onload="iFrameHeight()" allowtransparency="true"></iframe>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jsTree/jstree.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            ShowMoudle();
+            //切换系统
+            $('#sel-system').change(function () {
+                ShowMoudle();
+            });
+        });
+        function ShowMoudle()
+        {
+            $("#ModuleTree").data('jstree', false).empty();
+            $.post("/permission/gettree", { sysId: $("#sel-system").val() }, function (res) {
+                if (res.Status == "y") {
+                    $("#ModuleTree").jstree({
+                        "core": { "multiple": false, "data": res.Data }
+                    }).on("changed.jstree", function (e, data) {
+                        $("#DeployBase").prop("src", "/Sys/Permission/Index?moduleId=" + data.instance.get_node(data.selected).id);
+                    });
+                }
+                else {
+                    dig.error(res.Msg);
+                }
+            });
+        }
+        function iFrameHeight() {
+            var ifm = document.getElementById("DeployBase");
+            var subWeb = document.frames ? document.frames["DeployBase"].document : ifm.contentDocument;
+            if (ifm != null && subWeb != null) {
+                ifm.height = subWeb.body.scrollHeight < 500 ? subWeb.body.scrollHeight + 100 : subWeb.body.scrollHeight;
+            }
+        }
+    </script>
+}

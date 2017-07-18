@@ -16,6 +16,12 @@
     <property name="PermissionManage" ref="Service.Permission"/>
     <property name="SystemManage" ref="Service.System"/>
   </object>
+  <!--权限管理-->
+  <object type="WebPage.Areas.SysManage.Controllers.PermissionController,WebPage" singleton="false">
+    <property name="ModuleManage" ref="Service.Module"/>
+    <property name="PermissionManage" ref="Service.Permission"/>
+    <property name="SystemManage" ref="Service.System"/>
+  </object>
   <!--系统管理 end-->
 
 </objects>

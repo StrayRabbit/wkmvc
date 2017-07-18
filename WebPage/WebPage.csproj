@@ -20,6 +20,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -198,6 +199,7 @@
     <Compile Include="Areas\SysManage\Controllers\AccountController.cs" />
     <Compile Include="Areas\SysManage\Controllers\HomeController.cs" />
     <Compile Include="Areas\SysManage\Controllers\ModuleController.cs" />
+    <Compile Include="Areas\SysManage\Controllers\PermissionController.cs" />
     <Compile Include="Areas\SysManage\SysManageAreaRegistration.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Global.asax.cs">
@@ -770,6 +772,7 @@
     <Content Include="Content\ueditor\third-party\video-js\font\vjs.woff" />
     <Content Include="Areas\SysManage\Views\Module\Index.cshtml" />
     <Content Include="Areas\SysManage\Views\Module\Detail.cshtml" />
+    <Content Include="Areas\SysManage\Views\Permission\Home.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
