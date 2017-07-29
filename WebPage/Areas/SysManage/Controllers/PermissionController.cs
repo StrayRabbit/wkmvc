@@ -97,7 +97,7 @@ namespace WebPage.Areas.SysManage.Controllers
 
                 json.Data = result;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 json.Status = "n";
                 json.Msg = "服务器忙，请稍后再试！";
