@@ -7,12 +7,14 @@ using System.Text;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
+using System.Collections;
 
 namespace Service
 {
     /// <summary>
     /// 所有的数据操作基类接口
-    /// add yuangang by 2016-05-09
+    /// add yuangang by 2015-05-10
     /// </summary>
     public interface IRepository<T> where T : class
     {
@@ -20,104 +22,209 @@ namespace Service
         /// <summary>
         /// 数据上下文
         /// </summary>
-        DbContext Context { get; }
+        DbContext _Context { get; }
         /// <summary>
         /// 数据上下文
         /// </summary>
         Domain.MyConfig Config { get; }
-        /// <summary>
-        /// 数据模型操作
-        /// </summary>
-        DbSet<T> dbSet { get; }
-        /// <summary>
-        /// EF事务
-        /// </summary>
-        DbContextTransaction Transaction { get; set; }
-        /// <summary>
-        /// 事务提交结果
-        /// </summary>
-        bool Committed { get; set; }
-        /// <summary>
-        /// 提交事务
-        /// </summary>
-        void Commit();
-        /// <summary>
-        /// 回滚事务
-        /// </summary>
-        void Rollback();
         #endregion
 
-        #region 单模型操作
+        #region 单模型 CRUD 操作
         /// <summary>
-        /// 获取实体
+        /// 增加一条记录
         /// </summary>
-        /// <param name="id">主键</param>
-        /// <returns>实体</returns>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool Save(T entity, bool IsCommit = true);
+        /// <summary>
+        /// 增加一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> SaveAsync(T entity, bool IsCommit = true);
+
+        /// <summary>
+        /// 更新一条记录
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool Update(T entity, bool IsCommit = true);
+        /// <summary>
+        /// 更新一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> UpdateAsync(T entity, bool IsCommit = true);
+
+        /// <summary>
+        /// 增加或更新一条记录
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="isEdit">是否增加</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool SaveOrUpdate(T entity, bool isEdit, bool IsCommit = true);
+        /// <summary>
+        /// 增加或更新一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="isEdit">是否增加</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> SaveOrUpdateAsync(T entity, bool isEdit, bool IsCommit = true);
+
+        /// <summary>
+        /// 通过Lamda表达式获取实体
+        /// </summary>
+        /// <param name="predicate">Lamda表达式（p=>p.Id==Id）</param>
+        /// <returns></returns>
         T Get(Expression<Func<T, bool>> predicate);
         /// <summary>
-        /// 插入实体
+        /// 通过Lamda表达式获取实体（异步方式）
         /// </summary>
-        /// <param name="entity">实体</param>
-        /// <returns>ID</returns>
-        bool Save(T entity);
+        /// <param name="predicate">Lamda表达式（p=>p.Id==Id）</param>
+        /// <returns></returns>
+        Task<T> GetAsync(Expression<Func<T, bool>> predicate);
 
         /// <summary>
-        /// 修改实体
+        /// 删除一条记录
         /// </summary>
-        /// <param name="entity">实体</param>
-        bool Update(T entity);
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool Delete(T entity, bool IsCommit = true);
         /// <summary>
-        /// 修改或保存实体
+        /// 删除一条记录（异步方式）
         /// </summary>
-        /// <param name="entity">实体</param>
-        bool SaveOrUpdate(T entity, bool isEdit);
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> DeleteAsync(T entity, bool IsCommit = true);
 
-        /// <summary>
-        /// 删除实体
-        /// </summary>
-        int Delete(Expression<Func<T, bool>> predicate = null);
-
-        /// <summary>
-        /// 执行SQL删除
-        /// </summary>
-        int DeleteBySql(string sql, params DbParameter[] para);
-
-        /// <summary>
-        /// 根据属性验证实体对象是否存在
-        /// </summary>
-        bool IsExist(Expression<Func<T, bool>> predicate);
-
-        /// <summary>
-        /// 根据SQL验证实体对象是否存在
-        /// </summary>
-        bool IsExist(string sql, params DbParameter[] para);
         #endregion
 
         #region 多模型操作
         /// <summary>
-        /// 增加多模型数据，指定独立模型集合
+        /// 增加多条记录，同一模型
         /// </summary>
-        int SaveList<T1>(List<T1> t) where T1 : class;
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool SaveList(List<T> T1, bool IsCommit = true);
         /// <summary>
-        /// 增加多模型数据，与当前模型一致
+        /// 增加多条记录，同一模型（异步方式）
         /// </summary>
-        int SaveList(List<T> t);
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> SaveListAsync(List<T> T1, bool IsCommit = true);
+
         /// <summary>
-        /// 更新多模型，指定独立模型集合
+        /// 增加多条记录，独立模型
         /// </summary>
-        int UpdateList<T1>(List<T1> t) where T1 : class;
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool SaveList<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
         /// <summary>
-        /// 更新多模型，与当前模型一致
+        /// 增加多条记录，独立模型（异步方式）
         /// </summary>
-        int UpdateList(List<T> t);
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> SaveListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
+
         /// <summary>
-        /// 批量删除数据，当前模型
+        /// 更新多条记录，同一模型
         /// </summary>
-        int DeleteList(List<T> t);
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool UpdateList(List<T> T1, bool IsCommit = true);
         /// <summary>
-        /// 批量删除数据，独立模型
+        /// 更新多条记录，同一模型（异步方式）
         /// </summary>
-        int DeleteList<T1>(List<T1> t) where T1 : class;
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> UpdateListAsync(List<T> T1, bool IsCommit = true);
+
+        /// <summary>
+        /// 更新多条记录，独立模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool UpdateList<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
+        /// <summary>
+        /// 更新多条记录，独立模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> UpdateListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
+
+        /// <summary>
+        /// 删除多条记录，同一模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool DeleteList(List<T> T1, bool IsCommit = true);
+        /// <summary>
+        /// 删除多条记录，同一模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> DeleteListAsync(List<T> T1, bool IsCommit = true);
+
+        /// <summary>
+        /// 删除多条记录，独立模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        bool DeleteList<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
+        /// <summary>
+        /// 删除多条记录，独立模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        Task<bool> DeleteListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class;
+
+        /// <summary>
+        /// 通过Lamda表达式，删除一条或多条记录
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="IsCommit"></param>
+        /// <returns></returns>
+        bool Delete(Expression<Func<T, bool>> predicate, bool IsCommit = true);
+        /// <summary>
+        /// 通过Lamda表达式，删除一条或多条记录（异步方式）
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="IsCommit"></param>
+        /// <returns></returns>
+        Task<bool> DeleteAsync(Expression<Func<T, bool>> predicate, bool IsCommit = true);
+
+        /// <summary>
+        /// 执行SQL删除
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        int DeleteBySql(string sql, params DbParameter[] para);
+        /// <summary>
+        /// 执行SQL删除（异步方式）
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        Task<int> DeleteBySqlAsync(string sql, params DbParameter[] para);
         #endregion
 
         #region 存储过程操作
@@ -131,38 +238,115 @@ namespace Service
         object ExecuteQueryProc(string procname, params DbParameter[] parameter);
         #endregion
 
-        #region 查询多条数据
+        #region 获取多条数据操作
+
         /// <summary>
-        /// 获取集合 IQueryable
+        /// 返回IQueryable集合，延时加载数据
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         IQueryable<T> LoadAll(Expression<Func<T, bool>> predicate);
         /// <summary>
-        /// 获取集合 IList
+        /// 返回IQueryable集合，延时加载数据（异步方式）
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<IQueryable<T>> LoadAllAsync(Expression<Func<T, bool>> predicate);
+
+        // <summary>
+        /// 返回List<T>集合,不采用延时加载
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         List<T> LoadListAll(Expression<Func<T, bool>> predicate);
+        // <summary>
+        /// 返回List<T>集合,不采用延时加载（异步方式）
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<List<T>> LoadListAllAsync(Expression<Func<T, bool>> predicate);
+
         /// <summary>
         /// 获取DbQuery的列表
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         DbQuery<T> LoadQueryAll(Expression<Func<T, bool>> predicate);
+        /// <summary>
+        /// 获取DbQuery的列表（异步方式）
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<DbQuery<T>> LoadQueryAllAsync(Expression<Func<T, bool>> predicate);
+
         /// <summary>
         /// 获取IEnumerable列表
         /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
         IEnumerable<T> LoadEnumerableAll(string sql, params DbParameter[] para);
+        /// <summary>
+        /// 获取IEnumerable列表（异步方式）
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        Task<IEnumerable<T>> LoadEnumerableAllAsync(string sql, params DbParameter[] para);
+
         /// <summary>
         /// 获取数据动态集合
         /// </summary>
-        System.Collections.IEnumerable LoadEnumerable(string sql, params DbParameter[] para);
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        IEnumerable LoadEnumerable(string sql, params DbParameter[] para);
         /// <summary>
-        /// 采用SQL进行数据的查询，并转换
+        /// 获取数据动态集合（异步方式）
         /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        Task<IEnumerable> LoadEnumerableAsync(string sql, params DbParameter[] para);
+
+        /// <summary>
+        /// 采用SQL进行数据的查询，返回IList集合
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
         List<T> SelectBySql(string sql, params DbParameter[] para);
+        /// <summary>
+        /// 采用SQL进行数据的查询，返回IList集合（异步方式）
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        Task<List<T>> SelectBySqlAsync(string sql, params DbParameter[] para);
+
+        /// <summary>
+        /// 采用SQL进行数据的查询，指定泛型，返回IList集合
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
         List<T1> SelectBySql<T1>(string sql, params DbParameter[] para);
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象
+        /// 采用SQL进行数据的查询，指定泛型，返回IList集合
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
+        Task<List<T1>> SelectBySqlAsync<T1>(string sql, params DbParameter[] para);
+
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象集合
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
-        /// <typeparam name="TResult">数据结果，一般为object</typeparam>
+        /// <typeparam name="TResult">数据结果，与TEntity一致</typeparam>
         /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
         /// <param name="orderby">排序字段</param>
         /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
@@ -172,7 +356,22 @@ namespace Service
             where TEntity : class
             where TResult : class;
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象集合（异步方式）
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <typeparam name="TResult">数据结果，与TEntity一致</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>实体集合</returns>
+        Task<List<TResult>> QueryEntityAsync<TEntity, TOrderBy, TResult>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Expression<Func<TEntity, TResult>> selector, bool IsAsc)
+            where TEntity : class
+            where TResult : class;
+
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象集合
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
@@ -184,7 +383,7 @@ namespace Service
         List<object> QueryObject<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
             where TEntity : class;
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象集合（异步方式）
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
@@ -192,22 +391,60 @@ namespace Service
         /// <param name="orderby">排序字段</param>
         /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
         /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
-        /// <returns>动态类对象</returns>
+        /// <returns>自定义实体集合</returns>
+        Task<List<object>> QueryObjectAsync<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
+            where TEntity : class;
+
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象集合
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>动态类</returns>
         dynamic QueryDynamic<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
             where TEntity : class;
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象集合（异步方式）
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>动态类</returns>
+        Task<dynamic> QueryDynamicAsync<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
+            where TEntity : class;
+
+        #endregion
+
+        #region 验证是否存在
+
+        /// <summary>
+        /// 验证当前条件是否存在相同项
+        /// </summary>
+        bool IsExist(Expression<Func<T, bool>> predicate);
+        /// <summary>
+        /// 验证当前条件是否存在相同项（异步方式）
+        /// </summary>
+        Task<bool> IsExistAsync(Expression<Func<T, bool>> predicate);
+
+        /// <summary>
+        /// 根据SQL验证实体对象是否存在
+        /// </summary>
+        bool IsExist(string sql, params DbParameter[] para);
+        /// <summary>
+        /// 根据SQL验证实体对象是否存在（异步方式）
+        /// </summary>
+        Task<bool> IsExistAsync(string sql, params DbParameter[] para);
+
         #endregion
 
         #region 分页查询
-
-        /// <summary>
-        /// 通过SQL分页
-        /// </summary>
-        /// <param name="sql"></param>
-        /// <param name="parameters"></param>
-        /// <param name="page"></param>
-        /// <returns></returns>
-        IList<T1> PageByListSql<T1>(string sql, IList<DbParameter> parameters, PageCollection page);
-        IList<T> PageByListSql(string sql, IList<DbParameter> parameters, PageCollection page);
         /// <summary>
         /// 通用EF分页，默认显示20条记录
         /// </summary>
@@ -274,6 +511,17 @@ namespace Service
         /// 执行查询方法,返回动态类，接收使用var，遍历时使用dynamic类型
         /// </summary>
         object ExecuteSqlQuery(string sql, params DbParameter[] para);
+        #endregion
+
+        #region 更新操作
+        /// <summary>
+        /// 更新字段
+        /// </summary>
+        /// <param name="table">表名</param>
+        /// <param name="dic">被解析的字段</param>
+        /// <param name="where">条件</param>
+        /// <returns></returns>
+        bool Modify(string table, Dictionary<string, object> dic, string where);
         #endregion
     }
 }

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using Domain;
 using System.Linq.Expressions;
 using System.Collections;
+using System.Threading.Tasks;
+using Common;
 
 namespace Service
 {
     /// <summary>
     /// 数据操作基本实现类，公用实现方法
-    /// add yuangang by 2016-05-10
+    /// add yuangang by 2015-05-10
     /// </summary>
     /// <typeparam name="T">具体操作的实体模型</typeparam>
     public abstract class RepositoryBase<T> : IRepository<T> where T : class
@@ -23,9 +23,9 @@ namespace Service
 
         private DbContext context = new MyConfig().db;
         /// <summary>
-        /// 数据上下文--->根据Domain实体模型名称进行更改
+        /// 数据上下文
         /// </summary>
-        public DbContext Context
+        public DbContext _Context
         {
             get
             {
@@ -43,459 +43,614 @@ namespace Service
                 return new MyConfig();
             }
         }
-        /// <summary>
-        /// 公用泛型处理属性
-        /// 注:所有泛型操作的基础
-        /// </summary>
-        public DbSet<T> dbSet
-        {
-            get { return this.Context.Set<T>(); }
-        }
-        /// <summary>
-        /// 事务
-        /// </summary>
-        private DbContextTransaction _transaction = null;
-        /// <summary>
-        /// 开始事务
-        /// </summary>
-        public DbContextTransaction Transaction
-        {
-            get
-            {
-                if (this._transaction == null)
-                {
-                    this._transaction = this.Context.Database.BeginTransaction();
-                }
-                return this._transaction;
-            }
-            set { this._transaction = value; }
-        }
-        /// <summary>
-        /// 事务状态
-        /// </summary>
-        public bool Committed { get; set; }
-        /// <summary>
-        /// 异步锁定
-        /// </summary>
-        private readonly object sync = new object();
-        /// <summary>
-        /// 提交事务
-        /// </summary>
-        public void Commit()
-        {
-            if (!Committed)
-            {
-                lock (sync)
-                {
-                    if (this._transaction != null)
-                        _transaction.Commit();
-                }
-                Committed = true;
-            }
-        }
-        /// <summary>
-        /// 回滚事务
-        /// </summary>
-        public void Rollback()
-        {
-            Committed = false;
-            if (this._transaction != null)
-                this._transaction.Rollback();
-        }
         #endregion
 
-        #region 获取单条记录
+        #region 单模型 CRUD 操作
         /// <summary>
-        /// 通过lambda表达式获取一条记录p=>p.id==id
+        /// 增加一条记录
         /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool Save(T entity, bool IsCommit = true)
+        {
+            _Context.Set<T>().Add(entity);
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 增加一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> SaveAsync(T entity, bool IsCommit = true)
+        {
+            _Context.Set<T>().Add(entity);
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 更新一条记录
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool Update(T entity, bool IsCommit = true)
+        {
+            _Context.Set<T>().Attach(entity);
+            _Context.Entry<T>(entity).State = System.Data.Entity.EntityState.Modified;
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 更新一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> UpdateAsync(T entity, bool IsCommit = true)
+        {
+            _Context.Set<T>().Attach(entity);
+            _Context.Entry<T>(entity).State = System.Data.Entity.EntityState.Modified;
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 增加或更新一条记录
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsSave">是否增加</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool SaveOrUpdate(T entity, bool isEdit, bool IsCommit = true)
+        {
+            return isEdit ? Update(entity, IsCommit) : Save(entity, IsCommit);
+        }
+        /// <summary>
+        /// 增加或更新一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsSave">是否增加</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> SaveOrUpdateAsync(T entity, bool isEdit, bool IsCommit = true)
+        {
+            return isEdit ? await UpdateAsync(entity, IsCommit) : await SaveAsync(entity, IsCommit);
+        }
+
+        /// <summary>
+        /// 通过Lamda表达式获取实体
+        /// </summary>
+        /// <param name="predicate">Lamda表达式（p=>p.Id==Id）</param>
+        /// <returns></returns>
         public virtual T Get(Expression<Func<T, bool>> predicate)
         {
-            try
-            {
-                return dbSet.AsNoTracking().SingleOrDefault(predicate);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return _Context.Set<T>().AsNoTracking().SingleOrDefault(predicate);
         }
-        #endregion
-
-        #region 增删改操作
-
         /// <summary>
-        /// 添加一条模型记录，自动提交更改
+        /// 通过Lamda表达式获取实体（异步方式）
         /// </summary>
-        public virtual bool Save(T entity)
+        /// <param name="predicate">Lamda表达式（p=>p.Id==Id）</param>
+        /// <returns></returns>
+        public virtual async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            try
-            {
-                int row = 0;
-                var entry = this.Context.Entry<T>(entity);
-                entry.State = System.Data.Entity.EntityState.Added;
-                row = Context.SaveChanges();
-                entry.State = System.Data.Entity.EntityState.Detached;
-                return row > 0;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-
+            return await Task.Run(() => _Context.Set<T>().AsNoTracking().SingleOrDefault(predicate));
         }
 
         /// <summary>
-        /// 更新一条模型记录，自动提交更改
+        /// 删除一条记录
         /// </summary>
-        public virtual bool Update(T entity)
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool Delete(T entity, bool IsCommit = true)
         {
-            try
-            {
-                int rows = 0;
-                var entry = this.Context.Entry(entity);
-                entry.State = System.Data.Entity.EntityState.Modified;
-                rows = this.Context.SaveChanges();
-                entry.State = System.Data.Entity.EntityState.Detached;
-                return rows > 0;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            if (entity == null) return false;
+            _Context.Set<T>().Attach(entity);
+            _Context.Set<T>().Remove(entity);
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 删除一条记录（异步方式）
+        /// </summary>
+        /// <param name="entity">实体模型</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> DeleteAsync(T entity, bool IsCommit = true)
+        {
+            if (entity == null) return await Task.Run(() => false);
+            _Context.Set<T>().Attach(entity);
+            _Context.Set<T>().Remove(entity);
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false); ;
         }
 
-        /// <summary>
-        /// 更新模型记录，如不存在进行添加操作
-        /// </summary>
-        public virtual bool SaveOrUpdate(T entity, bool isEdit)
-        {
-            try
-            {
-                return isEdit ? Update(entity) : Save(entity);
-            }
-            catch (Exception e) { throw e; }
-        }
-
-        /// <summary>
-        /// 删除一条或多条模型记录，含事务
-        /// </summary>
-        public virtual int Delete(Expression<Func<T, bool>> predicate = null)
-        {
-            try
-            {
-                int rows = 0;
-                IQueryable<T> entry = (predicate == null) ? this.dbSet.AsQueryable() : this.dbSet.Where(predicate);
-                List<T> list = entry.ToList();
-                if (list.Count > 0)
-                {
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        this.dbSet.Remove(list[i]);
-                    }
-                    rows = this.Context.SaveChanges();
-                }
-                return rows;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        /// <summary>
-        /// 使用原始SQL语句,含事务处理
-        /// </summary>
-        public virtual int DeleteBySql(string sql, params DbParameter[] para)
-        {
-            try
-            {
-                return this.Context.Database.ExecuteSqlCommand(sql, para);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
         #endregion
 
         #region 多模型操作
-
         /// <summary>
-        /// 增加多模型数据，指定独立模型集合
+        /// 增加多条记录，同一模型
         /// </summary>
-        public virtual int SaveList<T1>(List<T1> t) where T1 : class
-        {
-            try
-            {
-                if (t == null || t.Count == 0) return 0;
-                this.Context.Set<T1>().Local.Clear();
-                foreach (var item in t)
-                {
-                    this.Context.Set<T1>().Add(item);
-                }
-                return this.Context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        /// <summary>
-        /// 增加多模型数据，与当前模型一致
-        /// </summary>
-        public virtual int SaveList(List<T> t)
-        {
-            try
-            {
-                this.dbSet.Local.Clear();
-                foreach (var item in t)
-                {
-                    this.dbSet.Add(item);
-                }
-                return this.Context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        /// <summary>
-        /// 更新多模型，指定独立模型集合
-        /// </summary>
-        public virtual int UpdateList<T1>(List<T1> t) where T1 : class
-        {
-            if (t.Count <= 0) return 0;
-            try
-            {
-                foreach (var item in t)
-                {
-                    this.Context.Entry<T1>(item).State = System.Data.Entity.EntityState.Modified;
-                }
-                return this.Context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        /// <summary>
-        /// 更新多模型，与当前模型一致
-        /// </summary>
-        public virtual int UpdateList(List<T> t)
-        {
-            if (t.Count <= 0) return 0;
-            try
-            {
-                foreach (var item in t)
-                {
-                    this.Context.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                }
-                return this.Context.SaveChanges();
-            }
-            catch (Exception e) { throw e; }
-        }
-        /// <summary>
-        /// 批量删除数据，当前模型
-        /// </summary>
-        public virtual int DeleteList(List<T> t)
-        {
-            if (t == null || t.Count == 0) return 0;
-            foreach (var item in t)
-            {
-                this.dbSet.Remove(item);
-            }
-            return this.Context.SaveChanges();
-        }
-        /// <summary>
-        /// 批量删除数据，自定义模型
-        /// </summary>
-        public virtual int DeleteList<T1>(List<T1> t) where T1 : class
-        {
-            try
-            {
-                if (t == null || t.Count == 0) return 0;
-                foreach (var item in t)
-                {
-                    this.Context.Set<T1>().Remove(item);
-                }
-                return this.Context.SaveChanges();
-            }
-            catch (Exception e) { throw e; }
-        }
-        #endregion
-
-        #region 存储过程操作
-        /// <summary>
-        /// 执行返回影响行数的存储过程
-        /// </summary>
-        /// <param name="procname">过程名称</param>
-        /// <param name="parameter">参数对象</param>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
         /// <returns></returns>
-        public virtual object ExecuteProc(string procname, params DbParameter[] parameter)
+        public virtual bool SaveList(List<T> T1, bool IsCommit = true)
         {
-            try
-            {
-                return ExecuteSqlCommand(procname, parameter);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        /// <summary>
-        /// 执行返回结果集的存储过程
-        /// </summary>
-        /// <param name="procname">过程名称</param>
-        /// <param name="parameter">参数对象</param>
-        /// <returns></returns>
-        public virtual object ExecuteQueryProc(string procname, params DbParameter[] parameter)
-        {
-            try
-            {
-                return this.Context.Database.SqlFunctionForDynamic(procname, parameter);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-        #endregion
+            if (T1 == null || T1.Count == 0) return false;
 
-        #region 存在验证操作
-        /// <summary>
-        /// 验证当前条件是否存在相同项
-        /// </summary>
-        public virtual bool IsExist(Expression<Func<T, bool>> predicate)
-        {
-            var entry = this.dbSet.Where(predicate);
-            return (entry.Any());
-        }
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Add(item);
+            });
 
-        /// <summary>
-        /// 根据SQL验证实体对象是否存在
-        /// </summary>
-        public virtual bool IsExist(string sql, params DbParameter[] para)
-        {
-            IEnumerable result = this.Context.Database.SqlQuery(typeof(int), sql, para);
-
-            if (result.GetEnumerator().Current == null || result.GetEnumerator().Current.ToString() == "0")
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
                 return false;
-            return true;
+        }
+        /// <summary>
+        /// 增加多条记录，同一模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> SaveListAsync(List<T> T1, bool IsCommit = true)
+        {
+            if (T1 == null || T1.Count == 0) return await Task.Run(() => false);
+
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Add(item);
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 增加多条记录，独立模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool SaveList<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return false;
+            _Context.Set<T1>().Local.Clear();
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Add(item);
+            });
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 增加多条记录，独立模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> SaveListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return await Task.Run(() => false);
+            _Context.Set<T1>().Local.Clear();
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Add(item);
+            });
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 更新多条记录，同一模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool UpdateList(List<T> T1, bool IsCommit = true)
+        {
+            if (T1 == null || T1.Count == 0) return false;
+
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Entry<T>(item).State = System.Data.Entity.EntityState.Modified;
+            });
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 更新多条记录，同一模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> UpdateListAsync(List<T> T1, bool IsCommit = true)
+        {
+            if (T1 == null || T1.Count == 0) return await Task.Run(() => false);
+
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Entry<T>(item).State = System.Data.Entity.EntityState.Modified;
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 更新多条记录，独立模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool UpdateList<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return false;
+
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Attach(item);
+                _Context.Entry<T1>(item).State = System.Data.Entity.EntityState.Modified;
+            });
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 更新多条记录，独立模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> UpdateListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return await Task.Run(() => false);
+
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Attach(item);
+                _Context.Entry<T1>(item).State = System.Data.Entity.EntityState.Modified;
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 删除多条记录，同一模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool DeleteList(List<T> T1, bool IsCommit = true)
+        {
+            if (T1 == null || T1.Count == 0) return false;
+
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Set<T>().Remove(item);
+            });
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 删除多条记录，同一模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> DeleteListAsync(List<T> T1, bool IsCommit = true)
+        {
+            if (T1 == null || T1.Count == 0) return await Task.Run(() => false);
+
+            T1.ToList().ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Set<T>().Remove(item);
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 删除多条记录，独立模型
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual bool DeleteList<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return false;
+
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Attach(item);
+                _Context.Set<T1>().Remove(item);
+            });
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 删除多条记录，独立模型（异步方式）
+        /// </summary>
+        /// <param name="T1">实体模型集合</param>
+        /// <param name="IsCommit">是否提交（默认提交）</param>
+        /// <returns></returns>
+        public virtual async Task<bool> DeleteListAsync<T1>(List<T1> T, bool IsCommit = true) where T1 : class
+        {
+            if (T == null || T.Count == 0) return await Task.Run(() => false);
+
+            T.ToList().ForEach(item =>
+            {
+                _Context.Set<T1>().Attach(item);
+                _Context.Set<T1>().Remove(item);
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 通过Lamda表达式，删除一条或多条记录
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="IsCommit"></param>
+        /// <returns></returns>
+        public virtual bool Delete(Expression<Func<T, bool>> predicate, bool IsCommit = true)
+        {
+            IQueryable<T> entry = (predicate == null) ? _Context.Set<T>().AsQueryable() : _Context.Set<T>().Where(predicate);
+            List<T> list = entry.ToList();
+
+            if (list != null && list.Count == 0) return false;
+            list.ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Set<T>().Remove(item);
+            });
+
+            if (IsCommit)
+                return _Context.SaveChanges() > 0;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 通过Lamda表达式，删除一条或多条记录（异步方式）
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="IsCommit"></param>
+        /// <returns></returns>
+        public virtual async Task<bool> DeleteAsync(Expression<Func<T, bool>> predicate, bool IsCommit = true)
+        {
+            IQueryable<T> entry = (predicate == null) ? _Context.Set<T>().AsQueryable() : _Context.Set<T>().Where(predicate);
+            List<T> list = entry.ToList();
+
+            if (list != null && list.Count == 0) return await Task.Run(() => false);
+            list.ForEach(item =>
+            {
+                _Context.Set<T>().Attach(item);
+                _Context.Set<T>().Remove(item);
+            });
+
+            if (IsCommit)
+                return await Task.Run(() => _Context.SaveChanges() > 0);
+            else
+                return await Task.Run(() => false);
+        }
+
+        /// <summary>
+        /// 执行SQL删除
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        public virtual int DeleteBySql(string sql, params DbParameter[] para)
+        {
+            return _Context.Database.ExecuteSqlCommand(sql, para);
+        }
+        /// <summary>
+        /// 执行SQL删除（异步方式）
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        public virtual async Task<int> DeleteBySqlAsync(string sql, params DbParameter[] para)
+        {
+            return await Task.Run(() => _Context.Database.ExecuteSqlCommand(sql, para));
         }
         #endregion
 
         #region 获取多条数据操作
+
         /// <summary>
         /// 返回IQueryable集合，延时加载数据
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public virtual IQueryable<T> LoadAll(Expression<Func<T, bool>> predicate)
         {
-            try
-            {
-                if (predicate != null)
-                {
-                    return this.dbSet.Where(predicate).AsNoTracking<T>();
-                }
-                return this.dbSet.AsQueryable<T>().AsNoTracking<T>();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return predicate != null ? _Context.Set<T>().Where(predicate).AsNoTracking<T>() : _Context.Set<T>().AsQueryable<T>().AsNoTracking<T>();
         }
         /// <summary>
-        /// 返回DbQuery集合，延时加载数据
+        /// 返回IQueryable集合，延时加载数据（异步方式）
         /// </summary>
-        public virtual DbQuery<T> LoadQueryAll(Expression<Func<T, bool>> predicate)
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public virtual async Task<IQueryable<T>> LoadAllAsync(Expression<Func<T, bool>> predicate)
         {
-            try
-            {
-                if (predicate != null)
-                {
-                    return this.dbSet.Where(predicate) as DbQuery<T>;
-                }
-                return this.dbSet;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return predicate != null ? await Task.Run(() => _Context.Set<T>().Where(predicate).AsNoTracking<T>()) : await Task.Run(() => _Context.Set<T>().AsQueryable<T>().AsNoTracking<T>());
         }
-        /// <summary>
-        /// 返回List集合,不采用延时加载
+
+        // <summary>
+        /// 返回List<T>集合,不采用延时加载
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public virtual List<T> LoadListAll(Expression<Func<T, bool>> predicate)
         {
-            try
-            {
-                if (predicate != null)
-                {
-                    return this.dbSet.Where(predicate).AsNoTracking().ToList();
-                }
-                return this.dbSet.AsQueryable<T>().AsNoTracking().ToList();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return predicate != null ? _Context.Set<T>().Where(predicate).AsNoTracking().ToList() : _Context.Set<T>().AsQueryable<T>().AsNoTracking().ToList();
+        }
+        // <summary>
+        /// 返回List<T>集合,不采用延时加载（异步方式）
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public virtual async Task<List<T>> LoadListAllAsync(Expression<Func<T, bool>> predicate)
+        {
+            return predicate != null ? await Task.Run(() => _Context.Set<T>().Where(predicate).AsNoTracking().ToList()) : await Task.Run(() => _Context.Set<T>().AsQueryable<T>().AsNoTracking().ToList());
+        }
+
+        /// <summary>
+        /// 获取DbQuery的列表
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public virtual DbQuery<T> LoadQueryAll(Expression<Func<T, bool>> predicate)
+        {
+            return predicate != null ? _Context.Set<T>().Where(predicate) as DbQuery<T> : _Context.Set<T>();
         }
         /// <summary>
-        /// 返回IEnumerable集合，采用原始T-Sql方式
+        /// 获取DbQuery的列表（异步方式）
         /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public virtual async Task<DbQuery<T>> LoadQueryAllAsync(Expression<Func<T, bool>> predicate)
+        {
+            return predicate != null ? await Task.Run(() => _Context.Set<T>().Where(predicate) as DbQuery<T>) : await Task.Run(() => _Context.Set<T>());
+        }
+
+        /// <summary>
+        /// 获取IEnumerable列表
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
         public virtual IEnumerable<T> LoadEnumerableAll(string sql, params DbParameter[] para)
         {
-            try
-            {
-                return this.Context.Database.SqlQuery<T>(sql, para);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return _Context.Database.SqlQuery<T>(sql, para);
         }
         /// <summary>
-        /// 返回IEnumerable动态集合，采用原始T-Sql方式
+        /// 获取IEnumerable列表（异步方式）
         /// </summary>
-        public virtual System.Collections.IEnumerable LoadEnumerable(string sql, params DbParameter[] para)
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        public virtual async Task<IEnumerable<T>> LoadEnumerableAllAsync(string sql, params DbParameter[] para)
         {
-            try
-            {
-                return this.Context.Database.SqlQueryForDynamic(sql, para);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return await Task.Run(() => _Context.Database.SqlQuery<T>(sql, para));
+        }
+
+        /// <summary>
+        /// 获取数据动态集合
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        public virtual IEnumerable LoadEnumerable(string sql, params DbParameter[] para)
+        {
+            return _Context.Database.SqlQueryForDynamic(sql, para);
         }
         /// <summary>
-        /// 返回IList集合，采用原始T-Sql方式
+        /// 获取数据动态集合（异步方式）
         /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        public virtual async Task<IEnumerable> LoadEnumerableAsync(string sql, params DbParameter[] para)
+        {
+            return await Task.Run(() => _Context.Database.SqlQueryForDynamic(sql, para));
+        }
+
+        /// <summary>
+        /// 采用SQL进行数据的查询，返回IList集合
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
         public virtual List<T> SelectBySql(string sql, params DbParameter[] para)
         {
-            try
-            {
-                return this.Context.Database.SqlQuery(typeof(T), sql, para).Cast<T>().ToList();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return _Context.Database.SqlQuery(typeof(T), sql, para).Cast<T>().ToList();
         }
         /// <summary>
-        /// 指定泛型，返回IList集合，采用原始T-Sql方式
+        /// 采用SQL进行数据的查询，返回IList集合（异步方式）
         /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">Parameters参数</param>
+        /// <returns></returns>
+        public virtual async Task<List<T>> SelectBySqlAsync(string sql, params DbParameter[] para)
+        {
+            return await Task.Run(() => _Context.Database.SqlQuery(typeof(T), sql, para).Cast<T>().ToList());
+        }
+
+        /// <summary>
+        /// 采用SQL进行数据的查询，指定泛型，返回IList集合
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
         public virtual List<T1> SelectBySql<T1>(string sql, params DbParameter[] para)
         {
-            try
-            {
-                return this.Context.Database.SqlQuery<T1>(sql, para).ToList();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return _Context.Database.SqlQuery<T1>(sql, para).ToList();
         }
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象
+        /// 采用SQL进行数据的查询，指定泛型，返回IList集合
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
+        public virtual async Task<List<T1>> SelectBySqlAsync<T1>(string sql, params DbParameter[] para)
+        {
+            return await Task.Run(() => _Context.Database.SqlQuery<T1>(sql, para).ToList());
+        }
+
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象集合
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
@@ -513,7 +668,7 @@ namespace Service
             where TEntity : class
             where TResult : class
         {
-            IQueryable<TEntity> query = this.Context.Set<TEntity>();
+            IQueryable<TEntity> query = _Context.Set<TEntity>();
             if (where != null)
             {
                 query = query.Where(where);
@@ -529,9 +684,40 @@ namespace Service
             }
             return query.Select(selector).AsNoTracking().ToList();
         }
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回实体对象集合（异步方式）
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <typeparam name="TResult">数据结果，与TEntity一致</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>实体集合</returns>
+        public virtual async Task<List<TResult>> QueryEntityAsync<TEntity, TOrderBy, TResult>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Expression<Func<TEntity, TResult>> selector, bool IsAsc)
+            where TEntity : class
+            where TResult : class
+        {
+            IQueryable<TEntity> query = _Context.Set<TEntity>();
+            if (where != null)
+            {
+                query = query.Where(where);
+            }
+
+            if (orderby != null)
+            {
+                query = IsAsc ? query.OrderBy(orderby) : query.OrderByDescending(orderby);
+            }
+            if (selector == null)
+            {
+                return await Task.Run(() => query.Cast<TResult>().AsNoTracking().ToList());
+            }
+            return await Task.Run(() => query.Select(selector).AsNoTracking().ToList());
+        }
 
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象集合
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
@@ -540,15 +726,10 @@ namespace Service
         /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
         /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
         /// <returns>自定义实体集合</returns>
-        public virtual List<object> QueryObject<TEntity, TOrderBy>
-            (Expression<Func<TEntity, bool>> where,
-            Expression<Func<TEntity, TOrderBy>> orderby,
-            Func<IQueryable<TEntity>,
-            List<object>> selector,
-            bool IsAsc)
+        public virtual List<object> QueryObject<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
             where TEntity : class
         {
-            IQueryable<TEntity> query = this.Context.Set<TEntity>();
+            IQueryable<TEntity> query = _Context.Set<TEntity>();
             if (where != null)
             {
                 query = query.Where(where);
@@ -564,9 +745,38 @@ namespace Service
             }
             return selector(query);
         }
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回Object对象集合（异步方式）
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>自定义实体集合</returns>
+        public virtual async Task<List<object>> QueryObjectAsync<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
+            where TEntity : class
+        {
+            IQueryable<TEntity> query = _Context.Set<TEntity>();
+            if (where != null)
+            {
+                query = query.Where(where);
+            }
+
+            if (orderby != null)
+            {
+                query = IsAsc ? query.OrderBy(orderby) : query.OrderByDescending(orderby);
+            }
+            if (selector == null)
+            {
+                return await Task.Run(() => query.AsNoTracking().ToList<object>());
+            }
+            return await Task.Run(() => selector(query));
+        }
 
         /// <summary>
-        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象集合
         /// </summary>
         /// <typeparam name="TEntity">实体对象</typeparam>
         /// <typeparam name="TOrderBy">排序字段类型</typeparam>
@@ -575,36 +785,101 @@ namespace Service
         /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
         /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
         /// <returns>动态类</returns>
-        public virtual dynamic QueryDynamic<TEntity, TOrderBy>
-            (Expression<Func<TEntity, bool>> where,
-            Expression<Func<TEntity, TOrderBy>> orderby,
-            Func<IQueryable<TEntity>,
-            List<object>> selector,
-            bool IsAsc)
+        public dynamic QueryDynamic<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
             where TEntity : class
         {
             List<object> list = QueryObject<TEntity, TOrderBy>
                  (where, orderby, selector, IsAsc);
-            return Common.JsonConverter.JsonClass(list);
+            return JsonConverter.JsonClass(list);
+        }
+        /// <summary>
+        /// 可指定返回结果、排序、查询条件的通用查询方法，返回动态类对象集合（异步方式）
+        /// </summary>
+        /// <typeparam name="TEntity">实体对象</typeparam>
+        /// <typeparam name="TOrderBy">排序字段类型</typeparam>
+        /// <param name="where">过滤条件，需要用到类型转换的需要提前处理与数据表一致的</param>
+        /// <param name="orderby">排序字段</param>
+        /// <param name="selector">返回结果（必须是模型中存在的字段）</param>
+        /// <param name="IsAsc">排序方向，true为正序false为倒序</param>
+        /// <returns>动态类</returns>
+        public virtual async Task<dynamic> QueryDynamicAsync<TEntity, TOrderBy>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TOrderBy>> orderby, Func<IQueryable<TEntity>, List<object>> selector, bool IsAsc)
+            where TEntity : class
+        {
+            List<object> list = QueryObject<TEntity, TOrderBy>
+                 (where, orderby, selector, IsAsc);
+            return await Task.Run(() => JsonConverter.JsonClass(list));
+        }
+
+        #endregion
+
+        #region 验证是否存在
+
+        /// <summary>
+        /// 验证当前条件是否存在相同项
+        /// </summary>
+        public virtual bool IsExist(Expression<Func<T, bool>> predicate)
+        {
+            var entry = _Context.Set<T>().Where(predicate);
+            return (entry.Any());
+        }
+        /// <summary>
+        /// 验证当前条件是否存在相同项（异步方式）
+        /// </summary>
+        public virtual async Task<bool> IsExistAsync(Expression<Func<T, bool>> predicate)
+        {
+            var entry = _Context.Set<T>().Where(predicate);
+            return await Task.Run(() => entry.Any());
+        }
+
+        /// <summary>
+        /// 根据SQL验证实体对象是否存在
+        /// </summary>
+        public virtual bool IsExist(string sql, params DbParameter[] para)
+        {
+            IEnumerable result = _Context.Database.SqlQuery(typeof(int), sql, para);
+
+            if (result.GetEnumerator().Current == null || result.GetEnumerator().Current.ToString() == "0")
+                return false;
+            return true;
+        }
+        /// <summary>
+        /// 根据SQL验证实体对象是否存在（异步方式）
+        /// </summary>
+        public virtual async Task<bool> IsExistAsync(string sql, params DbParameter[] para)
+        {
+            IEnumerable result = _Context.Database.SqlQuery(typeof(int), sql, para);
+
+            if (result.GetEnumerator().Current == null || result.GetEnumerator().Current.ToString() == "0")
+                return await Task.Run(() => false);
+            return await Task.Run(() => true);
+        }
+
+        #endregion
+
+        #region 存储过程操作
+        /// <summary>
+        /// 执行返回影响行数的存储过程
+        /// </summary>
+        /// <param name="procname">过程名称</param>
+        /// <param name="parameter">参数对象</param>
+        /// <returns></returns>
+        public virtual object ExecuteProc(string procname, params DbParameter[] parameter)
+        {
+            return ExecuteSqlCommand(procname, parameter);
+        }
+        /// <summary>
+        /// 执行返回结果集的存储过程
+        /// </summary>
+        /// <param name="procname">过程名称</param>
+        /// <param name="parameter">参数对象</param>
+        /// <returns></returns>
+        public virtual object ExecuteQueryProc(string procname, params DbParameter[] parameter)
+        {
+            return _Context.Database.SqlFunctionForDynamic(procname, parameter);
         }
         #endregion
 
         #region 分页操作
-        /// <summary>
-        /// 待自定义分页函数，使用必须重写，指定数据模型
-        /// </summary>
-        public virtual IList<T1> PageByListSql<T1>(string sql, IList<DbParameter> parameters, Common.PageCollection page)
-        {
-            return null;
-        }
-        /// <summary>
-        /// 待自定义分页函数，使用必须重写，
-        /// </summary>
-        public virtual IList<T> PageByListSql(string sql, IList<DbParameter> parameters, Common.PageCollection page)
-        {
-            return null;
-        }
-
         /// <summary>
         /// 对IQueryable对象进行分页逻辑处理，过滤、查询项、排序对IQueryable操作
         /// </summary>
@@ -669,7 +944,7 @@ namespace Service
                 pageSize = 20;
             }
 
-            IQueryable<TEntity> query = this.Context.Set<TEntity>();
+            IQueryable<TEntity> query = _Context.Set<TEntity>();
             if (where != null)
             {
                 query = query.Where(where);
@@ -752,7 +1027,7 @@ namespace Service
             #endregion
 
             //获取当前条件下数据总条数
-            int count = this.Context.Database.SqlQuery(typeof(int), "select count(*) from (" + tableName + ") where " + filter, para).Cast<int>().FirstOrDefault();
+            int count = _Context.Database.SqlQuery(typeof(int), "select count(*) from (" + tableName + ") where " + filter, para).Cast<int>().FirstOrDefault();
             string sql = "SELECT T.* FROM ( SELECT B.* FROM ( SELECT A.*,ROW_NUMBER() OVER(ORDER BY getdate()) as RN" +
                          logicSql + ") A ) B WHERE B.RN<=" + end + ") T WHERE T.RN>" + start;
             //排序
@@ -762,7 +1037,7 @@ namespace Service
             }
             var list = ExecuteSqlQuery(sql, para) as IEnumerable;
             if (list != null)
-                return new Common.PageInfo(index, pageSize, count, list.Cast<object>().ToList());
+                return new Common.PageInfo(index, pageSize, count, list);
             return new Common.PageInfo(index, pageSize, count, new { });
         }
 
@@ -807,7 +1082,7 @@ namespace Service
             }
             if (count > 0)
                 enumerable = enumerable.Skip((index - 1) * PageSize).Take(PageSize);
-            return new Common.PageInfo(index, PageSize, count, enumerable.ToList());
+            return new Common.PageInfo(index, PageSize, count, JsonConverter.JsonClass(enumerable.ToList()));
         }
         #endregion
 
@@ -817,14 +1092,7 @@ namespace Service
         /// </summary>
         public virtual object ExecuteSqlCommand(string sql, params DbParameter[] para)
         {
-            try
-            {
-                return this.Context.Database.ExecuteSqlCommand(sql, para);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return _Context.Database.ExecuteSqlCommand(sql, para);
 
         }
         /// <summary>
@@ -832,25 +1100,14 @@ namespace Service
         /// </summary>
         public virtual object ExecuteSqlCommand(Dictionary<string, object> sqllist)
         {
-            try
+            int rows = 0;
+            IEnumerator<KeyValuePair<string, object>> enumerator = sqllist.GetEnumerator();
+
+            while (enumerator.MoveNext())
             {
-                int rows = 0;
-                IEnumerator<KeyValuePair<string, object>> enumerator = sqllist.GetEnumerator();
-                using (Transaction)
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        rows += this.Context.Database.ExecuteSqlCommand(enumerator.Current.Key, enumerator.Current.Value);
-                    }
-                    Commit();
-                }
-                return rows;
+                rows += _Context.Database.ExecuteSqlCommand(enumerator.Current.Key, enumerator.Current.Value);
             }
-            catch (Exception e)
-            {
-                Rollback();
-                throw e;
-            }
+            return rows;
 
         }
         /// <summary>
@@ -858,15 +1115,49 @@ namespace Service
         /// </summary>
         public virtual object ExecuteSqlQuery(string sql, params DbParameter[] para)
         {
+            return _Context.Database.SqlQueryForDynamic(sql, para);
+        }
+
+        #endregion
+
+        #region 更新操作
+        /// <summary>
+        /// 更新字段
+        /// </summary>
+        /// <param name="table">表名</param>
+        /// <param name="dic">被解析的字段</param>
+        /// <param name="where">条件</param>
+        /// <returns></returns>
+        public bool Modify(string table, Dictionary<string, object> dic, string where)
+        {
             try
             {
-                return this.Context.Database.SqlQueryForDynamic(sql, para);
+                if (dic == null || dic.Count <= 0)
+                    return false;
+                List<DbParameter> list = new List<DbParameter>();
+                //解析字典
+                string col = string.Empty;
+                //字典反射
+                var kv = dic.GetEnumerator();
+                while (kv.MoveNext())
+                {
+                    var current = kv.Current;
+                    if (!string.IsNullOrEmpty(current.Key) && current.Value != null)
+                    {
+                        col += current.Key.ToLower() + "=@" + current.Key.ToLower() + ",";
+                        list.Add(new System.Data.SqlClient.SqlParameter("@" + current.Key.ToLower(), current.Value));
+                    }
+                }
+                col = col.Trim(',');
+                //拼接SQL
+                string sql = "update " + table + " set " + col + " where 1=1 " + where;
+                //执行
+                object obj = this.ExecuteSqlCommand(sql, list.ToArray());
+                return obj.ToString() != "0";
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            catch (Exception e) { throw e; }
         }
         #endregion
+
     }
 }

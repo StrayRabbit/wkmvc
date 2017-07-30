@@ -773,6 +773,7 @@
     <Content Include="Areas\SysManage\Views\Module\Index.cshtml" />
     <Content Include="Areas\SysManage\Views\Module\Detail.cshtml" />
     <Content Include="Areas\SysManage\Views\Permission\Home.cshtml" />
+    <Content Include="Areas\SysManage\Views\Permission\Index.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
