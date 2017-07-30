@@ -1,0 +1,54 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="/Content/css/jsTree/style.min.css" rel="stylesheet" />
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-3 col-xs-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content mailbox-content">
+                    <div class="file-manager">
+                        <div class="btn btn-block btn-primary compose-mail">部门列表</div>
+                        <div class="space-25"></div>
+                        <div id="ModuleTree">
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 col-xs-12">
+            <iframe src="" style="width:100%;" id="DeployBase" name="DeployBase" frameborder="0" scrolling="auto" onload="iFrameHeight()" allowtransparency="true"></iframe>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jsTree/jstree.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#ModuleTree").data('jstree', false).empty();
+            $.post("/sys/department/gettree", {}, function (res) {
+                if (res.Status == "y") {
+                    $("#ModuleTree").jstree({
+                        "core": { "multiple": false, "data": res.Data }
+                    }).on("changed.jstree", function (e, data) {
+                        $("#DeployBase").prop("src", "/Sys/Post/Index?departId=" + data.instance.get_node(data.selected).id);
+                    });
+                }
+                else {
+                    dig.error(res.Msg);
+                }
+            });
+        });
+        function iFrameHeight() {
+            var ifm = document.getElementById("DeployBase");
+            var subWeb = document.frames ? document.frames["DeployBase"].document : ifm.contentDocument;
+            if (ifm != null && subWeb != null) {
+                ifm.height = subWeb.body.scrollHeight < 500 ? subWeb.body.scrollHeight + 100 : subWeb.body.scrollHeight;
+            }
+        }
+    </script>
+}
+
+
+

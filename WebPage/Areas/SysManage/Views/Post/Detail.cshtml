@@ -1,0 +1,85 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Domain.SYS_POST
+<style type="text/css">
+    .gray-bg {
+        background-color: white;
+    }
+</style>
+@using (Ajax.BeginForm("Save", null, new AjaxOptions()
+{
+    HttpMethod = "Post",
+    OnBegin = "SubAjax.Loading",
+    OnComplete = "SubAjax.Complate",
+    OnFailure = "SubAjax.Failure",
+    OnSuccess = "SubAjax.Success"
+},
+                                           new { @class = "form-horizontal dig-from", @role = "form" }))
+{
+    @Html.HiddenFor(p => p.ID)
+    @Html.HiddenFor(p => p.FK_DEPARTID)
+    @Html.HiddenFor(p => p.CREATEDATE)
+    @Html.HiddenFor(p => p.CREATEUSER)
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="ibox-detail-title">
+                <i class="fa fa-pencil-square-o"></i>添加/修改岗位
+            </div>
+            <div class="ibox-content">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">岗位名称：</label>
+                    <div class="col-xs-10">
+                        @Html.TextBoxFor(p => p.POSTNAME, new { @class = "form-control", @placeholder = "请输入岗位名称", @datatype = "*", @nullmsg = "请输入岗位名称！", @errormsg = "请输入岗位名称！" })
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">岗位类型：</label>
+                            <div class="col-xs-8">
+                                <select id="posttype" name="posttype" class="input-sm form-control inline">
+                                    @{ var post = ViewData["postType"] as List<Domain.SYS_CODE>;
+                                        foreach (var item in post)
+                                        {
+                                            <option value="@item.CODEVALUE" @(Model.POSTTYPE == item.CODEVALUE ? "selected" : "")>@item.NAMETEXT</option>
+                                        }
+                                    }
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">岗位排序：</label>
+                            <div class="col-xs-8">
+                                @Html.TextBoxFor(p => p.SHOWORDER, new { @class = "form-control", @id = "modulepath", @placeholder = "请输入岗位排序值", @datatype = "n", @nullmsg = "请输入岗位排序值", @errormsg = "只能输入数字" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">备注：</label>
+                    <div class="col-xs-10">
+                        @Html.TextAreaFor(p => p.REMARK, new { @class = "form-control", @row = "4", @placeholder = "备注" })
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                    <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+                                        }
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('.form-horizontal').initValidform();
+        });
+    </script>
+}

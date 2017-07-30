@@ -38,6 +38,14 @@
     <property name="DepartmentManage" ref="Service.Department"/>
     <property name="PostManage" ref="Service.Post"></property>
   </object>
+  <!--岗位管理-->
+  <object type="WebPage.Areas.SysManage.Controllers.PostController,WebPage" singleton="false">
+    <property name="PostManage" ref="Service.Post"/>
+    <property name="PostUserManage" ref="Service.PostUser"/>
+    <property name="CodeManage" ref="Service.Code"/>
+    <property name="DepartmentManage" ref="Service.Department"/>
+  </object>
+  
   <!--系统管理 end-->
 
 </objects>
