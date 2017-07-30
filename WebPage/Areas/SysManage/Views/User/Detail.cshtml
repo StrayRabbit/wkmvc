@@ -1,0 +1,169 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Domain.SYS_USER
+<style type="text/css">
+    .gray-bg {
+        background-color: white;
+    }
+</style>
+@using (Ajax.BeginForm("Save", null, new AjaxOptions()
+{
+    HttpMethod = "Post",
+    OnBegin = "SubAjax.Loading",
+    OnComplete = "SubAjax.Complate",
+    OnFailure = "SubAjax.Failure",
+    OnSuccess = "SubAjax.Success"
+},
+                                           new { @class = "form-horizontal dig-from", @role = "form" }))
+{
+    @Html.HiddenFor(p => p.ID)
+    @Html.HiddenFor(p => p.PASSWORD)
+    @Html.HiddenFor(p => p.PINYIN1)
+    @Html.HiddenFor(p => p.PINYIN2)
+    @Html.HiddenFor(p => p.FACE_IMG)
+    @Html.HiddenFor(p => p.CREATEPER)
+    @Html.HiddenFor(p => p.CREATEDATE)
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="ibox-detail-title">
+                <i class="fa fa-pencil-square-o"></i>添加/修改用户
+            </div>
+            <div class="ibox-content">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">所属部门：</label>
+                    <div class="col-xs-10">
+                        <select id="DPTID" name="DPTID" class="form-control input-sm  input-s inline">
+                            @{
+                                foreach (var item in ViewBag.dpt)
+                                {
+                                    <option value="@item.id" @(Model.DPTID == @item.id ? "selected" : "")>@WebPages.CommonHtmlHelper.RtfTextToHtml(item.name)</option>
+                                }
+                            }
+                        </select>
+
+
+
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">用户姓名：</label>
+                            <div class="col-xs-8">
+                                @Html.TextBoxFor(p => p.NAME, new { @class = "form-control", @placeholder = "请输入用户姓名", @datatype = "*", @nullmsg = "请输入用户姓名！", @errormsg = "请输入用户姓名！" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">登录账号：</label>
+                            <div class="col-xs-8">
+                                @Html.TextBoxFor(p => p.ACCOUNT, new { @class = "form-control", @placeholder = "请输入登录账号", @datatype = "*", @nullmsg = "请输入登录账号！", @errormsg = "请输入登录账号！" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">公司排序：</label>
+                            <div class="col-xs-8">
+                                @Html.TextBoxFor(p => p.SHOWORDER1, new { @class = "form-control", @id = "modulepath", @placeholder = "请输入公司排序", @datatype = "n", @nullmsg = "请输入公司排序", @errormsg = "只能输入数字" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">部门排序：</label>
+                            <div class="col-xs-8">
+                                @Html.TextBoxFor(p => p.SHOWORDER2, new { @class = "form-control", @id = "modulepath", @placeholder = "请输入部门排序", @datatype = "n", @nullmsg = "请输入部门排序", @errormsg = "只能输入数字" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">部门职务：</label>
+                            <div class="col-xs-8">
+                                <select name="LEVELS" class="form-control input-sm  input-s-sm inline">
+                                    @{
+                                        foreach (var item in ViewBag.zw)
+                                        {
+                                            <option value="@item.CODEVALUE" @(Model.LEVELS == @item.CODEVALUE ? "selected" : "")>@item.NAMETEXT</option>
+                                        }
+                                    }
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">是否锁定：</label>
+                            <div class="col-xs-8">
+                                <label class="jswitch_line">
+                                    @Html.CheckBoxFor(p => p.ISCANLOGIN, new { @class = "js-switch" })
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">选择岗位：</label>
+                    <div id="departpost" class="col-xs-10"></div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                    <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+                                        }
+@section scripts{
+    <script type="text/javascript">
+        var postlist = '@ViewData["Postlist"]';
+        $(function () {
+            $('.form-horizontal').initValidform();
+            ShowPost();
+            //切换部门
+            $('#DPTID').change(function () {
+                ShowPost();
+            });
+        });
+        function ShowPost()
+        {
+            $.post("/sys/post/GetPostByDepart", { departId: $("#DPTID").val() }, function (data) {
+                if(data!=null&& data!=undefined)
+                {
+                    var html = '';
+                    for(var i=0;i<data.length;i++)
+                    {
+                        var jsonH = data[i];
+                        if (postlist.indexOf(jsonH.ID) < 0) {
+                            html += '<label class="icheck_line"><input name="postlist" type="checkbox"  class="icheck_box" value="' + jsonH.ID + '"  /> ' + jsonH.NAME + '</label>&emsp;';
+                        }
+                        else
+                        {
+                            html += '<label class="icheck_line"><input name="postlist" type="checkbox"  class="icheck_box" value="' + jsonH.ID + '" checked="checked" /> ' + jsonH.NAME + '</label>&emsp;';
+                        }
+                    }
+                    $("#departpost").html(html);
+                    //初始化CheckBox
+                    $(".icheck_box").iCheck({
+                        checkboxClass: 'icheckbox_minimal-red',
+                        radioClass: 'iradio_minimal-red',
+                        increaseArea: '20%' // optional
+                    });
+                }
+            });
+        }
+    </script>
+}

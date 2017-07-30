@@ -150,6 +150,18 @@ namespace Domain
                 .HasForeignKey(e => e.USERID)
                 .WillCascadeOnDelete(false);
 
+            modelBuilder.Entity<SYS_USER>()
+                .HasMany(e => e.SYS_POST_USER)
+                .WithRequired(e => e.SYS_USER)
+                .HasForeignKey(e => e.FK_USERID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<SYS_USER>()
+                .HasMany(e => e.SYS_USER_DEPARTMENT)
+                .WithRequired(e => e.SYS_USER)
+                .HasForeignKey(e => e.USER_ID)
+                .WillCascadeOnDelete(false);
+
             modelBuilder.Entity<SYS_USER_DEPARTMENT>()
                 .Property(e => e.DEPARTMENT_ID)
                 .IsUnicode(false);

@@ -45,7 +45,15 @@
     <property name="CodeManage" ref="Service.Code"/>
     <property name="DepartmentManage" ref="Service.Department"/>
   </object>
-  
+  <!--用户管理-->
+  <object type="WebPage.Areas.SysManage.Controllers.UserController,WebPage" singleton="false">
+    <property name="PostUserManage" ref="Service.PostUser"/>
+    <property name="DepartmentManage" ref="Service.Department"/>
+    <property name="PostManage" ref="Service.Post"/>
+    <property name="CodeManage" ref="Service.Code"/>
+    <property name="UserInfoManage" ref="Service.UserInfo"/>
+    <property name="RoleManage" ref="Service.Role"/>
+  </object>
   <!--系统管理 end-->
 
 </objects>

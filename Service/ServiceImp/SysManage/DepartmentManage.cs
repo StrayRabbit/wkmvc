@@ -218,7 +218,7 @@ namespace Service.ServiceImp
                     name = GetDepartmentName(p.NAME, p.BUSINESSLEVEL)
                 }).ToList();
 
-            return Common.JsonConverter.JsonClass(list);
+            return Common.JsonHelper.JsonConverter.JsonClass(list);
         }
     }
 }

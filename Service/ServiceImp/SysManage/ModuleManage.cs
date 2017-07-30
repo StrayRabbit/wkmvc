@@ -123,7 +123,7 @@ namespace Service.ServiceImp
         /// </summary>
         public dynamic LoadModuleInfo(int id)
         {
-            return Common.JsonConverter.JsonClass(this.LoadAll(p => p.PARENTID == id).OrderBy(p => p.ID).Select(p => new { p.ID, p.NAME }).ToList());
+            return Common.JsonHelper.JsonConverter.JsonClass(this.LoadAll(p => p.PARENTID == id).OrderBy(p => p.ID).Select(p => new { p.ID, p.NAME }).ToList());
         }
     }
     /// <summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Common;
+using Common.JsonHelper;
 using Service.IService;
 using WebPage.Controllers;
 
@@ -309,7 +310,7 @@ namespace WebPage.Areas.SysManage.Controllers
                 ISCUSTOMSTATUS = p.ISCUSTOM ? "<i class=\"fa fa-circle text-navy\"></i>" : "<i class=\"fa fa-circle text-danger\"></i>"
             }).ToList();
 
-            return new Common.PageInfo(result.Index, result.PageSize, result.Count, Common.JsonConverter.JsonClass(list));
+            return new Common.PageInfo(result.Index, result.PageSize, result.Count, Common.JsonHelper.JsonConverter.JsonClass(list));
         }
     }
 }

@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Common;
+using Common.JsonHelper;
 using Service.IService;
 using WebPage.Controllers;
-using static Common.JsonHelper;
 
 namespace WebPage.Areas.SysManage.Controllers
 {
@@ -78,28 +77,27 @@ namespace WebPage.Areas.SysManage.Controllers
         [UserAuthorizeAttribute(ModuleAlias = "User", OperaAction = "Detail")]
         public ActionResult Detail(int? id)
         {
-            return null;
-            //try
-            //{
-            //    var _entity = new Domain.SYS_USER();
+            try
+            {
+                var _entity = new Domain.SYS_USER();
 
-            //    var Postlist = "";
+                var Postlist = "";
 
-            //    if (id != null && id > 0)
-            //    {
-            //        _entity = UserManage.Get(p => p.ID == id);
-            //        Postlist = String.Join(",", _entity.SYS_POST_USER.Select(p => p.FK_POSTID).ToList());
-            //    }
-            //    ViewBag.dpt = this.DepartmentManage.GetDepartmentByDetail();
-            //    ViewBag.zw = this.CodeManage.LoadAll(p => p.CODETYPE == "ZW").ToList();
-            //    ViewData["Postlist"] = Postlist;
-            //    return View(_entity);
-            //}
-            //catch (Exception e)
-            //{
-            //    WriteLog(Common.Enums.enumOperator.Select, "加载用户详情发生错误：", e);
-            //    throw e.InnerException;
-            //}
+                if (id != null && id > 0)
+                {
+                    _entity = UserManage.Get(p => p.ID == id);
+                    Postlist = String.Join(",", _entity.SYS_POST_USER.Select(p => p.FK_POSTID).ToList());
+                }
+                ViewBag.dpt = this.DepartmentManage.GetDepartmentByDetail();
+                ViewBag.zw = this.CodeManage.LoadAll(p => p.CODETYPE == "ZW").ToList();
+                ViewData["Postlist"] = Postlist;
+                return View(_entity);
+            }
+            catch (Exception e)
+            {
+                WriteLog(Common.Enums.enumOperator.Select, "加载用户详情发生错误：", e);
+                throw e.InnerException;
+            }
         }
 
 
@@ -461,7 +459,7 @@ namespace WebPage.Areas.SysManage.Controllers
                 p.NAME,
                 p.ACCOUNT,
                 DPTNAME = this.DepartmentManage.GetDepartmentName(p.DPTID),
-                //POSTNAME = GetPostName(p.SYS_POST_USER),
+                POSTNAME = GetPostName(p.SYS_POST_USER),
                 ROLENAME = GetRoleName(p.SYS_USER_ROLE),
                 p.CREATEDATE,
                 ZW = this.CodeManage.Get(m => m.CODEVALUE == p.LEVELS && m.CODETYPE == "ZW").NAMETEXT,

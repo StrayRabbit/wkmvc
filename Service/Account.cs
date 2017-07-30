@@ -57,6 +57,8 @@ namespace Service
         /// </summary>
         public List<Domain.SYS_MODULE> Modules { get; set; }
         public List<string> System_Id { get; set; }
+        public string PinYin { get; set; }
+        public string Levels { get; set; }
         #endregion
     }
 }

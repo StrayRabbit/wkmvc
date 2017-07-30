@@ -1,0 +1,688 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model Domain.SYS_USERINFO
+<style type="text/css">
+    .profile-content i {
+        color: #1ab394;
+    }
+</style>
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="ibox-detail-title">
+            <i class="fa fa-pencil-square-o"></i>员工档案
+        </div>
+        @{
+            if (ViewBag.IsMatters)
+            {
+                <div class="ibox-content">
+                    @using (Ajax.BeginForm("SetUserInfo", null, new AjaxOptions()
+                    {
+                        HttpMethod = "Post",
+                        OnBegin = "SubAjax.Loading",
+                        OnComplete = "SubAjax.Complate",
+                        OnFailure = "SubAjax.Failure",
+                        OnSuccess = "SubAjax.Success"
+                    },
+                           new { @class = "form-horizontal dig-from", @role = "form" }))
+                    {
+                        @Html.HiddenFor(p => p.ID)
+                        @Html.HiddenFor(p => p.USERID)
+                        <div class="tabs-container">
+                            <ul class="nav nav-tabs">
+                                <li class="active">
+                                    <a data-toggle="tab" href="#tab-1" aria-expanded="true"> 基本信息</a>
+                                </li>
+                                <li class="">
+                                    <a data-toggle="tab" href="#tab-2" aria-expanded="false">档案信息</a>
+                                </li>
+                                <li class="">
+                                    <a data-toggle="tab" href="#tab-3" aria-expanded="false">学历信息</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div id="tab-1" class="tab-pane active">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-xs-5">
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">用户姓名：</label>
+                                                    <div class="col-xs-10">
+                                                        <label class="icheck_line" style="color:#1ab394">@ViewData["UserName"]</label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">性别：</label>
+                                                    <div class="col-xs-10">
+                                                        <label class="icheck_line">
+                                                            <input type="radio" name="SEXCODE" value="1" @(Model.SEXCODE != null && Model.SEXCODE == 1 ? "checked" : "") class="icheck_box">男
+                                                        </label>
+                                                        <label class="icheck_line">
+                                                            <input type="radio" name="SEXCODE" value="2" @(Model.SEXCODE != null && Model.SEXCODE == 2 ? "checked" : "") class="icheck_box">女
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">出生日期：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.BIRTHDAY, new { @class = "form-control", @placeholder = "请选择出生日期", @onclick = "ldate('BIRTHDAY')" })
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">手机号码：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.PHONE, new { @class = "form-control", @placeholder = "请输入手机号码", @datatype = "m", @nullmsg = "请输入手机号码！", @errormsg = "请输入手机号码！" })
+                                                            <span class="input-group-addon"><i class="fa fa-mobile"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">其它手机：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.SECONDPHONE, new { @class = "form-control", @placeholder = "请输入其它手机" })
+                                                            <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">办公电话：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.OFFICEPHONE, new { @class = "form-control", @placeholder = "请输入办公电话" })
+                                                            <span class="input-group-addon"><i class="fa fa-fax"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">用户邮箱：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.EMAILADDRESS, new { @class = "form-control", @placeholder = "请输入用户邮箱" })
+                                                            <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">在岗状态：</label>
+                                                    <div class="col-xs-10">
+                                                        <select name="WORKCODE" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var zgzt in ViewData["zgzt"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@zgzt.CODEVALUE" @(Model.WORKCODE != null && Model.WORKCODE.ToString() == @zgzt.CODEVALUE ? "selected" : "")>@zgzt.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">QQ：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.QQ, new { @class = "form-control", @placeholder = "请输入QQ" })
+                                                            <span class="input-group-addon"><i class="fa fa-qq"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">微信：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.WEBCHATOPENID, new { @class = "form-control", @placeholder = "请输入用户微信号" })
+                                                            <span class="input-group-addon"><i class="fa fa-wechat"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">车牌号：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.CARNUMBER, new { @class = "form-control", @placeholder = "请输入车牌号" })
+                                                            <span class="input-group-addon"><i class="fa fa-car"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-7">
+                                                <div class="form-group">
+                                                    <div class="col-xs-2"></div>
+                                                    <div class="col-xs-10">
+                                                        <div class="text-center">
+                                                            <img id="face_img" src="@Model.PHOTONEWNAME" style="width:295px;height:413px;" />
+                                                            <div class="hr-line-dashed"></div>
+                                                            @Html.HiddenFor(p => p.PHOTONEWNAME)
+                                                            @Html.HiddenFor(p => p.PHOTOOLDNAME)
+                                                            @Html.HiddenFor(p => p.PHOTOTYPE)
+                                                            <a href="javascript:void(0)" class="btn btn-primary btn-upload" data-img="face_img"><i class="fa fa-camera"></i> 上传1寸照</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tab-2" class="tab-pane">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-xs-6">
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">身份证号码：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.IDNUMBER, new { @class = "form-control", @placeholder = "请输入身份证号", @datatype = "*", @nullmsg = "请输入身份证号！", @errormsg = "请输入身份证号！" })
+                                                            <span class="input-group-addon"><i class="fa fa-credit-card"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">籍贯：</label>
+                                                    <div class="col-xs-10">
+                                                        @Html.Hidden("jg", Model.HomeTown)
+                                                        <select name="jgprov" id="jgprov" onchange="SelectCity('jgprov', 'jgcity')" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                        <select name="jgcity" id="jgcity" onchange="SelectCountry('jgcity', 'jgcountry')" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                        <select name="jgcountry" id="jgcountry" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">居住地：</label>
+                                                    <div class="col-xs-10">
+                                                        @Html.Hidden("hjzd", Model.HuJiSuoZaiDi)
+                                                        <select name="hkprov" id="hkprov" onchange="SelectCity('hkprov', 'hkcity')" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                        <select name="hkcity" id="hkcity" onchange="SelectCountry('hkcity', 'hkcountry')" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                        <select name="hkcountry" id="hkcountry" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">详细地址：</label>
+                                                    <div class="col-xs-10">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.HUJIPAICHUSUO, new { @class = "form-control", @placeholder = "请输入详细地址" })
+                                                            <span class="input-group-addon"><i class="fa fa-safari"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">政治面貌：</label>
+                                                    <div class="col-xs-10">
+                                                        <select name="IDENTITYCODE" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var zzmm in ViewData["zzmm"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@zzmm.CODEVALUE" @(Model.IDENTITYCODE != null && Model.IDENTITYCODE.ToString() == @zzmm.CODEVALUE ? "selected" : "")>@zzmm.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">民族：</label>
+                                                    <div class="col-xs-10">
+                                                        <select name="NATIONCODE" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var mz in ViewData["mz"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@mz.CODEVALUE" @(Model.NATIONCODE != null && Model.NATIONCODE.ToString() == @mz.CODEVALUE ? "selected" : "")>@mz.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">婚姻状况：</label>
+                                                    <div class="col-xs-10">
+                                                        <select name="MARRYCODE" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var hunyin in ViewData["hunyin"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@hunyin.CODEVALUE" @(Model.MARRYCODE != null && Model.MARRYCODE.ToString() == @hunyin.CODEVALUE ? "selected" : "")>@hunyin.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-xs-2 control-label">职称级别：</label>
+                                                    <div class="col-xs-10">
+                                                        <select name="ZHICHENG" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var zcjb in ViewData["zcjb"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@zcjb.CODEVALUE" @(Model.ZHICHENG != null && Model.ZHICHENG.ToString() == @zcjb.CODEVALUE ? "selected" : "")>@zcjb.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tab-3" class="tab-pane">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-xs-5">
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">毕业院校：</label>
+                                                    <div class="col-xs-9">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.GRADUATIONSCHOOL, new { @class = "form-control", @placeholder = "请输入毕业院校" })
+                                                            <span class="input-group-addon"><i class="fa fa-fort-awesome"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">专业：</label>
+                                                    <div class="col-xs-9">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.SPECIALTY, new { @class = "form-control", @placeholder = "请输入专业名称" })
+                                                            <span class="input-group-addon"><i class="fa fa-scribd"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">学历：</label>
+                                                    <div class="col-xs-9">
+                                                        <select name="XUELI" class="form-control input-sm  input-s-sm inline">
+                                                            <option value="-1">--请选择--</option>
+                                                            @{
+                                                                foreach (var xl in ViewData["xl"] as List<Domain.SYS_CODE>)
+                                                                {
+                                                                    <option value="@xl.CODEVALUE" @(Model.XUELI != null && Model.XUELI.ToString() == @xl.CODEVALUE ? "selected" : "")>@xl.NAMETEXT</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">参加工作时间：</label>
+                                                    <div class="col-xs-9">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.WORKDATE, new { @class = "form-control", @placeholder = "请选择出生日期", @onclick = "ldate('WORKDATE')" })
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">进入公司时间：</label>
+                                                    <div class="col-xs-9">
+                                                        <div class="input-group m-b">
+                                                            @Html.TextBoxFor(p => p.JINRUDATE, new { @class = "form-control", @placeholder = "请选择出生日期", @onclick = "ldate('JINRUDATE')" })
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-xs-3 control-label">简历：</label>
+                                                    <div class="col-xs-9">
+                                                        <div class="input-group">
+                                                            @Html.HiddenFor(p => p.RESUMEOLDNAME)
+                                                            @Html.HiddenFor(p => p.RESUMETYPE)
+                                                            @Html.TextBoxFor(p => p.RESUMENEWNAME, new { @class = "form-control", @placeholder = "请上传简历" })
+                                                            <span class="input-group-btn"><button type="button" class="btn btn-primary" id="upfile"><i class="fa fa-file-word-o"></i> 上传简历</button></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-7">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="text-center">
+                            <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                            <a class="btn btn-warning" href="javascript:history.go(-1)"><i class="fa fa-reply-all"></i> 取消返回</a>
+                        </div>
+                                                                }
+                </div>
+                                                                }
+                                                                else if (Model != null && Model.ID > 0)
+                                                                {
+                                                                    <div class="ibox-content gray-bg">
+                                                                        <div class="row">
+                                                                            <div class="col-xs-4">
+                                                                                <div class="ibox-title">
+                                                                                    <h5>个人资料</h5>
+                                                                                </div>
+                                                                                <div class="ibox-content">
+                                                                                    <div class="text-center">
+                                                                                        <img src="@Model.PHOTONEWNAME" style="width:295px;height:413px;" />
+                                                                                    </div>
+                                                                                    <div class="ibox-content profile-content">
+                                                                                        <h4><strong>@ViewData["UserName"]</strong></h4>
+                                                                                        @{
+                                                                                            if (Model.WORKCODE != null && Model.WORKCODE >= 0)
+                                                                                            {
+                                                                                                var zgzt = ViewData["zgzt"] as List<Domain.SYS_CODE>;
+                                                                                                var userzgzt = zgzt.Where(p => p.CODEVALUE == Model.WORKCODE.ToString()).FirstOrDefault().NAMETEXT;
+                                                                                                <div class="mailbox-content" style="padding:0;">
+                                                                                                    <ul class="tag-list clearfix" style="padding:0">
+                                                                                                        <li>
+                                                                                                            <a href="mail_compose.html"><i class="fa fa-tag"></i> @userzgzt</a>
+                                                                                                        </li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            }
+                                                                                            <p><i class="fa fa-map-marker"></i> @Html.Raw(new Models.CommonHelper().GetCodeAreaName(Model.HuJiSuoZaiDi) + "&nbsp;" + Model.HUJIPAICHUSUO) </p>
+                                                                                        }
+                                                                                        <p><i class="fa fa-mobile"></i> @Model.PHONE &nbsp; @Model.SECONDPHONE</p>
+                                                                                        <p><i class="fa fa-fax"></i> @Model.OFFICEPHONE &nbsp; <i class="fa fa-envelope"></i> @Model.EMAILADDRESS</p>
+                                                                                        <p><i class="fa fa-qq"></i> @Model.QQ &nbsp; <i class="fa fa-wechat"></i> @Model.WEBCHATOPENID</p>
+                                                                                        <p></p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-xs-8">
+                                                                                <div class="ibox-title">
+                                                                                    <h5>档案信息</h5>
+                                                                                </div>
+                                                                                <div class="ibox-content">
+                                                                                    <div class="row">
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">身份证号码：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @(Model.IDNUMBER != null ? Model.IDNUMBER.Substring(0, 14) + "***" : "")
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">籍贯：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @Html.Raw(new Models.CommonHelper().GetCodeAreaName(Model.HomeTown))
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">政治面貌：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @{
+                                                                                                    if (Model.IDENTITYCODE != null && Model.IDENTITYCODE >= 0)
+                                                                                                    {
+                                                                                                        var zzmm = ViewData["zzmm"] as List<Domain.SYS_CODE>;
+                                                                                                        <div>@zzmm.Where(p => p.CODEVALUE == Model.IDENTITYCODE.ToString()).FirstOrDefault().NAMETEXT</div>
+                                                                                                    }
+                                                                                                }
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">民族：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @{
+                                                                                                    if (Model.NATIONCODE != null && Model.NATIONCODE >= 0)
+                                                                                                    {
+                                                                                                        var mz = ViewData["mz"] as List<Domain.SYS_CODE>;
+                                                                                                        <div>@mz.Where(p => p.CODEVALUE == Model.NATIONCODE.ToString()).FirstOrDefault().NAMETEXT</div>
+                                                                                                    }
+                                                                                                }
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">婚姻状况：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @{
+                                                                                                    if (Model.MARRYCODE != null && Model.MARRYCODE >= 0)
+                                                                                                    {
+                                                                                                        var hunyin = ViewData["hunyin"] as List<Domain.SYS_CODE>;
+                                                                                                        <div>@hunyin.Where(p => p.CODEVALUE == Model.MARRYCODE.ToString()).FirstOrDefault().NAMETEXT</div>
+                                                                                                    }
+                                                                                                }
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">职称级别：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @{
+                                                                                                    if (Model.ZHICHENG != null && Model.ZHICHENG >= 0)
+                                                                                                    {
+                                                                                                        var zcjb = ViewData["zcjb"] as List<Domain.SYS_CODE>;
+                                                                                                        <div>@zcjb.Where(p => p.CODEVALUE == Model.ZHICHENG.ToString()).FirstOrDefault().NAMETEXT</div>
+                                                                                                    }
+                                                                                                }
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="ibox-title">
+                                                                                    <h5>学历信息</h5>
+                                                                                </div>
+                                                                                <div class="ibox-content">
+                                                                                    <div class="row">
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">毕业院校：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @Model.GRADUATIONSCHOOL
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">专业：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @Model.SPECIALTY
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">学历：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @{
+                                                                                                    if (Model.XUELI != null && Model.XUELI >= 0)
+                                                                                                    {
+                                                                                                        var xl = ViewData["xl"] as List<Domain.SYS_CODE>;
+                                                                                                        <div>@xl.Where(p => p.CODEVALUE == Model.XUELI.ToString()).FirstOrDefault().NAMETEXT</div>
+                                                                                                    }
+                                                                                                }
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="ibox-title">
+                                                                                    <h5>其它信息</h5>
+                                                                                </div>
+                                                                                <div class="ibox-content">
+                                                                                    <div class="row">
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">参加工作时间：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @Model.WORKDATE
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">进入公司时间：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                @Model.JINRUDATE
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-group clearfix">
+                                                                                            <label class="col-xs-2 control-label">简历：</label>
+                                                                                            <div class="col-xs-10">
+                                                                                                <a href="@Model.RESUMENEWNAME">下载简历</a>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="hr-line-dashed"></div>
+                                                                        <div class="text-center">
+                                                                            <a class="btn btn-warning" href="/Sys/User"><i class="fa fa-reply-all"></i> 返回</a>
+                                                                        </div>
+                                                                    </div>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        <div class="ibox-content text-center">
+                                                                                                            未找到员工档案
+                                                                                                            <div class="hr-line-dashed"></div>
+                                                                                                            <div class="text-center">
+                                                                                                                <a class="btn btn-warning" href="/Sys/User"><i class="fa fa-reply-all"></i> 返回</a>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    }
+        }
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('.form-horizontal').initValidform();
+            $.ajax({
+                url: '/Sys/CodeArea/prov',
+                data: null,
+                type: 'post',
+                dataType: 'json',
+                async: false,
+                cache: false,
+                success: function (res) {
+                    if (res.Status == 'y') {
+                        var option = '<option value="">--请选择--</option>';
+                        var data = eval(res.Data);
+                        for (var i = 0; i < data.length; i++) {
+                            var jsonH = data[i];
+                            option += '<option value="' + jsonH.ID + '">' + jsonH.NAME + '</option>';
+                        }
+                        $('#hkprov').html(option);
+                        $('#jgprov').html(option);
+                    }
+                }
+            });
+            //上传照片
+            $(".btn-upload").click(function () {
+                var t = $(this).attr("data-img");
+                dig.upload($('#' + t).attr('src'), function () {
+                    var retval = this.returnValue;
+                    if (retval != '') {
+                        var json = JSON.parse(retval);
+                        $('#' + t).attr('src', json.path) && $('#PHOTONEWNAME').val(json.path) && $('#PHOTOOLDNAME').val(json.thumbpath) && $('#PHOTOTYPE').val(json.ext);
+                    } else {
+                        $('#' + t).attr('src', '') && $('#PHOTONEWNAME').val('') && $('#PHOTOOLDNAME').val('') && $('#PHOTOTYPE').val('');
+                    }
+                });
+            });
+            //用户省份级联值
+            //籍贯
+            var jg = $('#jg').val();
+            if (jg != '') {
+                var jgprov = jg.split(',')[0];
+                var jgcity = jg.split(',')[1];
+                var jgcountry = jg.split(',')[2];
+                $('#jgprov').find('option[value="' + jgprov + '"]').attr('selected', 'selected');
+                if (jgprov != '') {
+                    SelectCity('jgprov', 'jgcity');
+                    $('#jgcity').find('option[value="' + jgcity + '"]').attr('selected', 'selected');
+                    if (jgcity != '') {
+                        SelectCountry('jgcity', 'jgcountry');
+                        $('#jgcountry').find('option[value="' + jgcountry + '"]').attr('selected', 'selected');
+                    }
+                }
+            }
+            //户口
+            var hjzd = $('#hjzd').val();
+            if (hjzd != '') {
+                var hkprov = hjzd.split(',')[0];
+                var hkcity = hjzd.split(',')[1];
+                var hkcountry = hjzd.split(',')[2];
+                $('#hkprov').find('option[value="' + hkprov + '"]').attr('selected', 'selected');
+                if (jgprov != '') {
+                    SelectCity('hkprov', 'hkcity');
+                    $('#hkcity').find('option[value="' + hkcity + '"]').attr('selected', 'selected');
+                    if (jgcity != '') {
+                        SelectCountry('hkcity', 'hkcountry');
+                        $('#hkcountry').find('option[value="' + hkcountry + '"]').attr('selected', 'selected');
+                    }
+                }
+            }
+        });
+        //加载城市
+        function SelectCity(t, n) {
+            var prov = $('#' + t).val();
+            var city = $('#' + n);
+            var option = '<option value="">--请选择--</option>';
+            if (prov == '') {
+                city.html(option);
+            } else {
+                $.ajax({
+                    url: '/Sys/CodeArea/City/' + prov,
+                    data: null,
+                    type: 'post',
+                    dataType: 'json',
+                    async: false,
+                    cache: false,
+                    success: function (res) {
+                        if (res.Status == 'y') {
+                            var data = eval(res.Data);
+                            for (var i = 0; i < data.length; i++) {
+                                var jsonH = data[i];
+                                option += '<option value="' + jsonH.ID + '">' + jsonH.NAME + '</option>';
+                            }
+                        }
+                        city.html(option);
+                    }
+                });
+            }
+        }
+        //加载县级市
+        function SelectCountry(t, n) {
+            var city = $('#' + t).val();
+            var country = $('#' + n);
+            var option = '<option value="">--请选择--</option>';
+            if (city == '') {
+                country.html(option);
+            } else {
+                $.ajax({
+                    url: '/Sys/CodeArea/Country/' + city,
+                    data: null,
+                    type: 'post',
+                    dataType: 'json',
+                    async: false,
+                    cache: false,
+                    success: function (res) {
+                        if (res.Status == 'y') {
+                            var data = eval(res.Data);
+                            for (var i = 0; i < data.length; i++) {
+                                var jsonH = data[i];
+                                option += '<option value="' + jsonH.ID + '">' + jsonH.NAME + '</option>';
+                            }
+                        }
+                        country.html(option);
+                    }
+                });
+            }
+        }
+    </script>
+}
+

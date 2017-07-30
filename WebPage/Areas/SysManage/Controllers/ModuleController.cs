@@ -9,6 +9,7 @@ using Common.Enums;
 using Domain;
 using Common;
 using System.Text.RegularExpressions;
+using Common.JsonHelper;
 
 namespace WebPage.Areas.SysManage.Controllers
 {
@@ -289,7 +290,7 @@ namespace WebPage.Areas.SysManage.Controllers
             {
                 entity = entity.Where(p => p.NAME.Contains(keywords));
             }
-            return Common.JsonConverter.JsonClass(entity);
+            return Common.JsonHelper.JsonConverter.JsonClass(entity);
         }
         #endregion
 

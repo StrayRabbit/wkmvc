@@ -4,14 +4,13 @@
   <!--系统管理begin-->
   <!--用户管理-->
   <object id="Service.User" type="Service.ServiceImp.UserManage,Service" singleton="false">
-    <property name="UserInfoManage" ref="Service.UserInfo"/>
-    <property name="PermissionManage" ref="Service.Permission"/>
-    <property name="DepartmentManage" ref="Service.Department"/>
-    <!--<property name="UserRoleManage" ref="Service.UserRole"/>
-    <property name="UserPermissionManage" ref="Service.UserPermission"/>
-    <property name="PostUserManage" ref="Service.PostUser"/>
-    
-    -->
+    <property name="UserInfoManage" ref="Service.UserInfo" />
+    <property name="UserRoleManage" ref="Service.UserRole" />
+    <property name="UserPermissionManage" ref="Service.UserPermission" />
+    <property name="PostUserManage" ref="Service.PostUser" />
+    <property name="PermissionManage" ref="Service.Permission" />
+    <property name="DepartmentManage" ref="Service.Department" />
+    <property name="UserDepartmentManage" ref="Service.UserDepartment"/>
   </object>
 
 
@@ -34,11 +33,8 @@
   <object id="Service.PostUser" type="Service.ServiceImp.PostUserManage,Service" singleton="false">
   </object>
 
-  <!--<object id="Service.UserRole" type="Service.ServiceImp.UserRoleManage,Service" singleton="false">
+  <object id="Service.UserDepartment" type="Service.ServiceImp.UserDepartmentManage,Service" singleton="false">
   </object>
-  <object id="Service.PostUser" type="Service.ServiceImp.PostUserManage,Service" singleton="false">
-  </object>-->
-
 
   <!--预置编码管理-->
   <object id="Service.Code" type="Service.ServiceImp.CodeManage,Service" singleton="false" />

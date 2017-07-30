@@ -4,9 +4,9 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Common;
+using Common.JsonHelper;
 using Service.IService;
 using WebPage.Controllers;
-using static Common.JsonHelper;
 
 namespace WebPage.Areas.SysManage.Controllers
 {

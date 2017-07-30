@@ -15,7 +15,7 @@ namespace Service.ServiceImp
         public dynamic LoadSystemInfo(List<string> systems)
         {
             //return Common.JsonHelper.JsonConverter.JsonClass(this.LoadAll(null).Select(p => new { p.ID }).ToList());//??p.Name
-            return Common.JsonConverter.JsonClass(this.LoadAll(p => systems.Any(e => e == p.ID)).Select(p => new { p.ID, p.NAME }).ToList());
+            return Common.JsonHelper.JsonConverter.JsonClass(this.LoadAll(p => systems.Any(e => e == p.ID)).Select(p => new { p.ID, p.NAME }).ToList());
         }
     }
 }

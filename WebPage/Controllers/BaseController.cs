@@ -202,7 +202,7 @@ namespace WebPage.Controllers
         {
             //操作权限
             var _varPerListThisModule = account.Permissions.Where(p => p.MODULEID == moduleId).Select(R => new { R.PERVALUE }).ToList();
-            return Common.JsonConverter.Serialize(_varPerListThisModule);
+            return Common.JsonHelper.JsonConverter.Serialize(_varPerListThisModule);
         }
 
         /// <summary>

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization.Json;
 using System.IO;
 
-namespace Common
+namespace Common.JsonHelper
 {
 
     /// <summary>

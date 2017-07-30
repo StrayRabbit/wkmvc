@@ -87,6 +87,7 @@
     <Compile Include="log4net.Ext\IExtLog.cs" />
     <Compile Include="PageCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringHelper\ConvertHzToPz.cs" />
     <Compile Include="ToolsHelper\PredicateBuilder.cs" />
     <Compile Include="ToolsHelper\RegexHelper.cs" />
     <Compile Include="ToolsHelper\Tools.cs" />
