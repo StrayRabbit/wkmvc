@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using Common;
 using Service.IService;
+using Service.ServiceImp;
 using WebPage.Controllers;
 
 namespace WebPage.Areas.SysManage.Controllers
@@ -28,6 +29,7 @@ namespace WebPage.Areas.SysManage.Controllers
         IModuleManage ModuleManage { get; set; }
         IRolePermissionManage RolePermissionManage { get; set; }
         IUserPermissionManage UserPermissionManage { get; set; }
+        ICodeManage CodeManage { get; set; }
         #endregion
 
         [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "View")]
@@ -86,6 +88,31 @@ namespace WebPage.Areas.SysManage.Controllers
             catch (Exception e)
             {
                 WriteLog(Common.Enums.enumOperator.Select, "对模块权限按钮的管理加载主页：", e);
+                throw e.InnerException;
+            }
+        }
+
+        [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "Detail")]
+        public ActionResult Detail(int? id)
+        {
+            try
+            {
+                var _entity = this.PermissionManage.Get(p => p.ID == id) ?? new Domain.SYS_PERMISSION();
+
+                //获取模块ID
+                var moduleId = Request.QueryString["moduleId"];
+
+                if (!string.IsNullOrEmpty(moduleId))
+                {
+                    int newmoduleid = int.Parse(moduleId);
+                    _entity.MODULEID = newmoduleid;
+                }
+                ViewData["PresetValue"] = CodeManage.GetCode("ROLEVALUE");
+                return View(_entity);
+            }
+            catch (Exception e)
+            {
+                WriteLog(Common.Enums.enumOperator.Select, "对模块权限按钮的管理加载详情：", e);
                 throw e.InnerException;
             }
         }
@@ -240,5 +267,84 @@ namespace WebPage.Areas.SysManage.Controllers
             return Json(json);
         }
 
+        /// <summary>
+        /// 保存权限
+        /// </summary>
+        [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "Add,Edit")]
+        public ActionResult Save(Domain.SYS_PERMISSION entity)
+        {
+            bool isEdit = false;
+            JsonHelper json = new JsonHelper() { Msg = "保存权限成功", Status = "n" };
+            try
+            {
+                if (entity != null)
+                {
+                    if (System.Text.Encoding.GetEncoding("gb2312").GetBytes(entity.NAME.Trim()).Length > 50)
+                    {
+                        json.Msg = "权限的名称长度不能超过50个字符";
+                        return Json(json);
+                    }
+                    entity.ICON = Request.Form["ICON"];
+                    var nextpervalue = Request.Form["NEXTPERVALUE"];
+                    if (!string.IsNullOrEmpty(nextpervalue))
+                    {
+                        if (!Regex.IsMatch(nextpervalue, @"^[A-Za-z0-9]{1,20}$"))
+                        {
+                            json.Msg = "权限值只能以英文数字组成，长度不能超过20个字符";
+                            return Json(json);
+                        }
+                        entity.PERVALUE = nextpervalue;
+                    }
+                    //添加
+                    if (entity.ID <= 0)
+                    {
+                        entity.CREATEDATE = DateTime.Now;
+                        entity.UPDATEDATE = DateTime.Now;
+                        entity.UPDATEUSER = this.CurrentUser.Name;
+                        entity.CREATEUSER = this.CurrentUser.Name;
+                    }
+                    else //编辑
+                    {
+                        entity.UPDATEUSER = this.CurrentUser.Name;
+                        entity.UPDATEDATE = DateTime.Now;
+                        isEdit = true;
+                    }
+                    //同一模块下权限不能重复
+                    if (!this.PermissionManage.IsExist(p => p.NAME.Equals(entity.NAME) && p.ID != entity.ID && p.MODULEID == entity.MODULEID))
+                    {
+                        if (PermissionManage.SaveOrUpdate(entity, isEdit))
+                        {
+                            json.Status = "y";
+                        }
+                        else
+                        {
+                            json.Msg = "保存失败";
+                        }
+                    }
+                    else
+                    {
+                        json.Msg = "权限" + entity.NAME + "同一模块下已存在，不能重复添加";
+                    }
+                }
+                else
+                {
+                    json.Msg = "未找到要保存的权限记录";
+                }
+                if (isEdit)
+                {
+                    WriteLog(Common.Enums.enumOperator.Edit, "修改权限，结果：" + json.Msg, Common.Enums.enumLog4net.INFO);
+                }
+                else
+                {
+                    WriteLog(Common.Enums.enumOperator.Add, "添加权限，结果：" + json.Msg, Common.Enums.enumLog4net.INFO);
+                }
+            }
+            catch (Exception e)
+            {
+                json.Msg = "保存权限发生内部错误！";
+                WriteLog(Common.Enums.enumOperator.None, "对模块权限按钮的管理保存权限：", e);
+            }
+            return Json(json);
+        }
     }
 }

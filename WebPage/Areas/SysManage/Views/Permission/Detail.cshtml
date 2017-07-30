@@ -1,0 +1,149 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Domain.SYS_PERMISSION
+<style type="text/css">
+    .gray-bg {
+        background-color: white;
+    }
+
+    .changeicon {
+        float: right;
+        margin-right: -52px;
+        border: none;
+        background-color: #18a689;
+        color: #FFFFFF;
+        height: 34px;
+        margin-top: -7px;
+    }
+
+    .removeicon {
+        background-color: #f8ac59;
+        float: right;
+        margin-right: -92px;
+        border: none;
+        color: #FFFFFF;
+        height: 34px;
+        margin-top: -7px;
+    }
+</style>
+@using (Ajax.BeginForm("Save", null, new AjaxOptions()
+                           {
+                               HttpMethod = "Post",
+                               OnBegin = "SubAjax.Loading",
+                               OnComplete = "SubAjax.Complate",
+                               OnFailure = "SubAjax.Failure",
+                               OnSuccess = "SubAjax.Success"
+                           },
+                               new { @class = "form-horizontal dig-from", @role = "form" }))
+{
+    @Html.HiddenFor(p => p.ID)
+    @Html.HiddenFor(p => p.MODULEID)
+    @Html.HiddenFor(p => p.CREATEDATE)
+    @Html.HiddenFor(p => p.CREATEUSER)
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="ibox-detail-title">
+                <i class="fa fa-pencil-square-o"></i>添加/修改权限
+            </div>
+            <div class="ibox-content">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">权限名称：</label>
+                    <div class="col-xs-10">
+                        @Html.TextBoxFor(p => p.NAME, new { @class = "form-control input-s-sm", @id = "modulename", @placeholder = "请输入权限名称", @datatype = "*", @nullmsg = "请输入权限名称！", @errormsg = "请输入权限名称！" })
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label class="col-xs-4 control-label">权限值：</label>
+                            <div class="col-xs-8">
+                                <select id="PERVALUE" name="PERVALUE" class="form-control input-s-sm">
+                                    <option value="">请选择</option>
+                                    @{
+                                        var per = ViewData["PresetValue"] as List<Domain.SYS_CODE>;
+                                        if (per != null && per.Count > 0)
+                                        {
+                                            foreach (var item in per)
+                                            {
+                                                <option value="@item.CODEVALUE" @(Model.PERVALUE == item.CODEVALUE ? "selected" : "")>@item.NAMETEXT</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                @Html.TextBox("NEXTPERVALUE", "", new { @class = "form-control input-s-sm" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">权限图标：</label>
+                    <div class="col-xs-10">
+                        <span id="icon" class="form-control input-s-sm">
+                            @Html.Hidden("ICON", Model.ICON)
+                            <a class="btn btn-primary btn-xs"><i class="@Model.ICON"></i></a>
+                            <button class="changeicon" type="button">
+                                选择
+                            </button>
+                            <button class="removeicon" type="button">
+                                移除
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">显示顺序：</label>
+                    <div class="col-xs-10">
+                        @Html.TextBoxFor(p => p.SHOWORDER, new { @class = "form-control input-s-sm", @placeholder = "请输入显示顺序", @datatype = "n1-5", @nullmsg = "请输入显示顺序！", @errormsg = "显示顺序只能是数字！" })
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                    <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+                                        }
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('.form-horizontal').initValidform();
+            if ($('#PERVALUE').val() == '' && $('#ID').val() != '') {
+                $('#NEXTPERVALUE').val('@Model.PERVALUE');
+            }
+        });
+        //移除图标
+        $('.removeicon').click(function () {
+            $('#icon').find('a>i').attr('class', '');
+            $('#ICON').val('');
+        });
+        //选择图标
+        $('.changeicon').click(function () {
+            var oldicon = $('#icon').find('a>i');
+            top.dialog({
+                title: '选择图标',
+                url: '/Sys/Module/ShowIcon',
+                width: 700,
+                height: 380,
+                data: oldicon.attr('class'), // 给 iframe 的数据
+                onclose: function () {
+                    this.returnValue && oldicon.attr('class', this.returnValue) && $('#ICON').val(this.returnValue);
+                },
+                oniframeload: function () {
+                }
+            }).showModal();
+            return false;
+        });
+    </script>
+}

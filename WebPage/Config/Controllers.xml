@@ -23,6 +23,7 @@
     <property name="SystemManage" ref="Service.System"/>
     <property name="RolePermissionManage" ref="Service.RolePermission"/>
     <property name="UserPermissionManage" ref="Service.UserPermission"/>
+    <property name="CodeManage" ref="Service.Code"/>
   </object>
   <!--系统管理 end-->
 
