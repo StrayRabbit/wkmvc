@@ -1,11 +1,2 @@
-/Common/bin/
-/Common/obj/
-
-/Domain/bin/
-/Domain/obj/
-
-/Service/bin/
-/Service/obj/
-
-/WebPage/bin/
-/WebPage/obj/
+/bin
+/obj
