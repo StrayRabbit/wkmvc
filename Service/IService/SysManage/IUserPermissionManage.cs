@@ -11,6 +11,6 @@ namespace Service.IService
         /// <param name="newper">权限字符串</param>
         /// <param name="sysId">系统ID</param>
         /// <returns></returns>
-        bool SetUserPermission(int userId,string newper,string sysId);
+        bool SetUserPermission(int userId, string newper); //,string sysId);
     }
 }

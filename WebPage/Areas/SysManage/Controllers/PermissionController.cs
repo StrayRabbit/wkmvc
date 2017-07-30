@@ -30,6 +30,7 @@ namespace WebPage.Areas.SysManage.Controllers
         IRolePermissionManage RolePermissionManage { get; set; }
         IUserPermissionManage UserPermissionManage { get; set; }
         ICodeManage CodeManage { get; set; }
+        IRoleManage RoleManage { get; set; }
         #endregion
 
         [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "View")]
@@ -345,6 +346,168 @@ namespace WebPage.Areas.SysManage.Controllers
                 WriteLog(Common.Enums.enumOperator.None, "对模块权限按钮的管理保存权限：", e);
             }
             return Json(json);
+        }
+
+        /// <summary>
+        /// 角色、用户分配权限
+        /// </summary>
+        [UserAuthorizeAttribute(ModuleAlias = "Role", OperaAction = "Allocation")]
+        public ActionResult PerAllocation()
+        {
+            //系统
+            string sysname = "所有可操作系统";
+            //用户或角色ID
+            string id = Request["id"];
+
+            //权限类型，user/role
+            string tp = Request["tp"];
+
+            string sysid = "";
+            //搜索关键字
+            ViewBag.Search = base.keywords;
+
+            if (string.IsNullOrEmpty(tp))
+            {
+                return Content("<script>alert('未接收到需要分配权限的类型')</script>");
+            }
+            if (string.IsNullOrEmpty(id))
+            {
+                return Content("<script>alert('未接收到需要分配权限的对象')</script>");
+            }
+
+            int newid = int.Parse(id);
+
+            //模块
+            var moduleList = new List<Domain.SYS_MODULE>();
+
+
+            if (tp == "role")
+            {
+                var Role = RoleManage.Get(p => p.ID == newid);
+                var sys = SystemManage.Get(p => p.ID == Role.FK_BELONGSYSTEM.ToString());
+                sysname = sys.NAME;
+                sysid = sys.ID;
+
+                //获取角色所属系统模块
+                moduleList = this.ModuleManage.RecursiveModule(this.ModuleManage.LoadAll(p => p.FK_BELONGSYSTEM == Role.FK_BELONGSYSTEM).ToList());
+            }
+            else if (tp == "user")
+            {
+                //获取管理员可操作系统模块
+                moduleList = this.ModuleManage.RecursiveModule(this.ModuleManage.LoadAll(p => CurrentUser.System_Id.Any(e => e == p.FK_BELONGSYSTEM)).ToList());
+            }
+
+            //搜索关键字
+            if (!string.IsNullOrEmpty(keywords))
+            {
+                moduleList = moduleList.Where(p => p.NAME.Contains(keywords.ToLower())).ToList();
+            }
+
+            ViewData["ModuleList"] = JsonConverter.JsonClass(moduleList.Select(p => new { p.ID, MODULENAME = GetModuleName(p.NAME, p.LEVELS), p.ICON, p.PARENTID, p.LEVELS }));
+
+            //获取权限
+            var moduleId = moduleList.Select(p => p.ID).ToList();
+
+            ViewData["PermissionList"] = this.PermissionManage.LoadAll(p => moduleId.Any(e => e == p.MODULEID)).ToList();
+
+            //根据类型获取用户/角色已选中的权限
+            var selectper = new List<string>();
+            if (tp == "user")
+            {
+                selectper =
+                    this.UserPermissionManage.LoadAll(p => p.FK_USERID == newid)
+                        .Select(p => p.FK_PERMISSIONID)
+                        .Cast<string>()
+                        .ToList();
+            }
+            else if (tp == "role")
+            {
+                selectper =
+                    this.RolePermissionManage.LoadAll(p => p.ROLEID == newid)
+                        .Select(p => p.PERMISSIONID)
+                        .Cast<string>()
+                        .ToList();
+            }
+
+            ViewData["selectper"] = selectper;
+
+            ViewData["PermissionType"] = tp;
+
+            ViewData["objId"] = id;
+
+            ViewData["systemName"] = sysname;
+
+            ViewData["systemId"] = sysid;
+
+            return View();
+        }
+
+        /// <summary>
+        /// 设置角色、用户权限
+        /// </summary>
+        public ActionResult SaveAllocation()
+        {
+            var json = new JsonHelper() { Msg = "分配权限完毕", Status = "n" };
+            //类型
+            string tp = Request.Form["tp"];
+            //对象ID
+            string id = Request.Form["id"];
+            //权限ID集合
+            string perid = Request.Form["perid"];
+
+            string sysid = Request.Form["sysid"];
+
+            if (string.IsNullOrEmpty(id))
+            {
+                json.Msg = "未要分配权限的对象";
+                WriteLog(Common.Enums.enumOperator.Allocation, "设置角色权限，结果：" + json.Msg, Common.Enums.enumLog4net.ERROR);
+                return Json(json);
+            }
+
+            if (string.IsNullOrEmpty(tp))
+            {
+                json.Msg = "未要分配权限的类型";
+                WriteLog(Common.Enums.enumOperator.Allocation, "设置角色权限，结果：" + json.Msg, Common.Enums.enumLog4net.ERROR);
+                return Json(json);
+            }
+
+            perid = perid.Trim(',');
+
+            try
+            {
+                if (tp == "user")
+                {
+                    if (!this.UserPermissionManage.SetUserPermission(int.Parse(id), perid)) { json.Msg = "保存失败"; WriteLog(Common.Enums.enumOperator.Allocation, "设置用户权限，结果：" + json.Msg, Common.Enums.enumLog4net.ERROR); return Json(json); }
+                }
+                else if (tp == "role")
+                {
+                    if (!this.RolePermissionManage.SetRolePermission(int.Parse(id), perid, sysid)) { json.Msg = "保存失败"; WriteLog(Common.Enums.enumOperator.Allocation, "设置角色权限，结果：" + json.Msg, Common.Enums.enumLog4net.ERROR); return Json(json); }
+                }
+
+                json.Status = "y";
+
+                WriteLog(Common.Enums.enumOperator.Allocation, "设置角色权限，结果：" + json.Msg, Common.Enums.enumLog4net.INFO);
+            }
+            catch (Exception e)
+            {
+                json.Msg = "设置角色权限发生内部错误！";
+                WriteLog(Common.Enums.enumOperator.Allocation, "设置角色权限：", e);
+            }
+            return Json(json);
+        }
+
+        private object GetModuleName(string name, decimal? level)
+        {
+            if (level > 0)
+            {
+                string nbsp = "";
+                for (int i = 0; i < level; i++)
+                {
+                    nbsp += "　　";
+                }
+                name = nbsp + "|--" + name;
+            }
+            return name;
         }
     }
 }

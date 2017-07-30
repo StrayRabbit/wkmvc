@@ -1,0 +1,148 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .gray-bg {
+        background-color: white;
+    }
+
+    .permissionlist .icheck_line {
+        color: #1ab394;
+        cursor: pointer;
+        font-weight: normal;
+        margin-right: 5px;
+    }
+</style>
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="ibox-detail-title">
+            <i class="fa fa-pencil-square-o"></i>分配权限
+        </div>
+        <div class="ibox-content">
+            @using (Ajax.BeginForm("PerAllocation", null, new AjaxOptions() { }, new { @id = "form1", @class = "form-horizontal", @method = "get" }))
+            {
+                @Html.Hidden("tp", ViewData["PermissionType"])
+                @Html.Hidden("id", ViewData["objId"])
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>系统：</label>
+                        <label class="icheck_line" style="color:#1ab394"> @ViewData["systemName"]</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            @Html.TextBox("Search", null, new { @class = "input-sm form-control", @placeholder = "请输入查询关键词" })
+                            <span class="input-group-btn">
+                                <button type="submit" onclick="submit()" class="btn btn-sm btn-primary"> 搜索</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row">
+                <table class="table table-striped table-bordered table-hover dataTables-example" style="text-align:center;">
+                    <thead>
+                        <tr>
+                            <th class="tn" style="width: 50px !important"><input name="checkall" class="icheck_box" type="checkbox" value=""></th>
+                            <th style="width:200px!important;">模块名称</th>
+                            <th>权限</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var module = ViewData["ModuleList"] as dynamic;
+                            var permission = ViewData["PermissionList"] as List<Domain.SYS_PERMISSION>;
+                            var selectper = ViewData["selectper"] as List<string>;
+                            if (module != null)
+                            {
+                                foreach (var item in module)
+                                {
+                                    <tr>
+                                        <td class="tn">
+                                            @{
+                                                if (permission.FindAll(p => p.MODULEID == item.ID).Count > 0)
+                                                {
+                                                    <input name="ckb_module" class="icheck_box" type="checkbox" value="" data-id="@item.ID" />
+                                                }
+                                            }
+
+                                        </td>
+                                        <td style="width:200px!important;text-align:left;"><a href="javascript:void(0)"><i class="@item.ICON"></i>@Html.Raw(item.MODULENAME)</a></td>
+                                        <td style="text-align:left;">
+                                            <div class="permissionlist">
+                                                @{
+                                                    if (permission != null && permission.Count > 0 && permission.FindAll(p => p.MODULEID == item.ID).Count > 0)
+                                                    {
+                                                        foreach (var per in permission.FindAll(p => p.MODULEID == item.ID))
+                                                        {
+                                                            var sel = selectper.Find(p => p == per.ID.ToString());
+                                                            <label class="icheck_line"><input name="ckb_per" type="checkbox" data-module="@item.ID" class="icheck_box" value="@per.ID" @(sel != null ? "checked" : "") /><i class="@per.ICON"></i>@per.NAME</label>
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                                        }
+                                                    }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="hr-line-dashed"></div>
+            <div class="text-center">
+                <button class="btn btn-primary btn-save" type="submit"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            //全选 反选
+            $('input[name="checkall"]').on('ifChecked', function (event) {
+                $("input[name='ckb_module']").iCheck('check');
+            });
+            $('input[name="checkall"]').on('ifUnchecked', function (event) {
+                $("input[name='ckb_module']").iCheck('uncheck');
+            });
+            //单行选中 取消
+            $('input[name="ckb_module"]').on('ifChecked', function (event) {
+                $("input[data-module='" + $(this).attr("data-id") + "']").iCheck('check');
+            });
+            $('input[name="ckb_module"]').on('ifUnchecked', function (event) {
+                $("input[data-module='" + $(this).attr("data-id") + "']").iCheck('uncheck');
+            });
+            //提交保存
+            $('.btn-save').click(function () {
+                var perid = '';
+                $('input[name="ckb_per"]:checked').each(function () {
+                    perid += $(this).attr('value') + ',';
+                });
+                $.post('/Sys/Permission/SaveAllocation', {
+                    tp: $('#tp').val(),
+                    id: $('#id').val(),
+                    perid: perid,
+                    sysid: "@ViewData["systemId"]",
+                }, function (result) {
+                    if (result.Status == 'y') {
+                        var dialog = top.dialog.get(window);
+                        dig.successcallback(result.Msg, function () {
+                            if (dialog == "undefined" || dialog == undefined) {
+                                location.reload();
+                            }
+                            else {
+                                dialog.close('yes').remove();
+                            }
+
+                        });
+                    } else {
+                        dig.error(result.Msg);
+                    }
+                }, 'json');
+            });
+        });
+    </script>
+}
+

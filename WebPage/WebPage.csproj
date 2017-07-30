@@ -200,6 +200,8 @@
     <Compile Include="Areas\SysManage\Controllers\HomeController.cs" />
     <Compile Include="Areas\SysManage\Controllers\ModuleController.cs" />
     <Compile Include="Areas\SysManage\Controllers\PermissionController.cs" />
+    <Compile Include="Areas\SysManage\Controllers\RoleController.cs" />
+    <Compile Include="Areas\SysManage\Models\CommonHtmlHelper.cs" />
     <Compile Include="Areas\SysManage\SysManageAreaRegistration.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Global.asax.cs">
@@ -775,6 +777,10 @@
     <Content Include="Areas\SysManage\Views\Permission\Home.cshtml" />
     <Content Include="Areas\SysManage\Views\Permission\Index.cshtml" />
     <Content Include="Areas\SysManage\Views\Permission\Detail.cshtml" />
+    <Content Include="Areas\SysManage\Views\Role\Index.cshtml" />
+    <Content Include="Areas\SysManage\Views\Role\Detail.cshtml" />
+    <Content Include="Areas\SysManage\Views\Role\RoleCall.cshtml" />
+    <Content Include="Areas\SysManage\Views\Permission\PerAllocation.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
