@@ -6,16 +6,13 @@ namespace Domain
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    public partial class SYS_ROLE_PERMISSION
+    public partial class SYS_USER_DEPARTMENT
     {
         public int ID { get; set; }
 
-        public int ROLEID { get; set; }
+        public int? USER_ID { get; set; }
 
-        public int PERMISSIONID { get; set; }
-
-        public virtual SYS_PERMISSION SYS_PERMISSION { get; set; }
-
-        public virtual SYS_ROLE SYS_ROLE { get; set; }
+        [StringLength(50)]
+        public string DEPARTMENT_ID { get; set; }
     }
 }

@@ -71,136 +71,46 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="COM_CONTENT.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="COM_DAILYS.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="COM_UPLOAD.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="COM_WORKATTENDANCE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="MAIL_ATTACHMENT.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="MAIL_INBOX.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="MAIL_OUTBOX.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
+    <Compile Include="COM_CONTENT.cs" />
+    <Compile Include="COM_DAILYS.cs" />
+    <Compile Include="COM_UPLOAD.cs" />
+    <Compile Include="COM_WORKATTENDANCE.cs" />
+    <Compile Include="Entities.cs" />
+    <Compile Include="MAIL_ATTACHMENT.cs" />
+    <Compile Include="MAIL_INBOX.cs" />
+    <Compile Include="MAIL_OUTBOX.cs" />
     <Compile Include="MyConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PRO_PROJECTS.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="PRO_PROJECT_FILES.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="PRO_PROJECT_MESSAGE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="PRO_PROJECT_STAGES.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="PRO_PROJECT_TEAMS.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Sql_Wkdb.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Sql_Wkdb.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Sql_Wkdb.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Sql_Wkdb.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Sql_Wkdb.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_BUSSINESSCUSTOMER.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_CHATMESSAGE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_CODE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_CODE_AREA.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_DEPARTMENT.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_LOG.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_MODULE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_PERMISSION.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_POST.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_POST_USER.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_ROLE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_ROLE_PERMISSION.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_SYSTEM.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_USER.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_USERINFO.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_USER_ONLINE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_USER_PERMISSION.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
-    <Compile Include="SYS_USER_ROLE.cs">
-      <DependentUpon>Sql_Wkdb.tt</DependentUpon>
-    </Compile>
+    <Compile Include="PRO_PROJECTS.cs" />
+    <Compile Include="PRO_PROJECT_FILES.cs" />
+    <Compile Include="PRO_PROJECT_MESSAGE.cs" />
+    <Compile Include="PRO_PROJECT_STAGES.cs" />
+    <Compile Include="PRO_PROJECT_TEAMS.cs" />
+    <Compile Include="SYS_BUSSINESSCUSTOMER.cs" />
+    <Compile Include="SYS_CHATMESSAGE.cs" />
+    <Compile Include="SYS_CODE.cs" />
+    <Compile Include="SYS_CODE_AREA.cs" />
+    <Compile Include="SYS_DEPARTMENT.cs" />
+    <Compile Include="SYS_LOG.cs" />
+    <Compile Include="SYS_MODULE.cs" />
+    <Compile Include="SYS_PERMISSION.cs" />
+    <Compile Include="SYS_POST.cs" />
+    <Compile Include="SYS_POST_USER.cs" />
+    <Compile Include="SYS_ROLE.cs" />
+    <Compile Include="SYS_ROLE_PERMISSION.cs" />
+    <Compile Include="SYS_SYSTEM.cs" />
+    <Compile Include="SYS_USER.cs" />
+    <Compile Include="SYS_USERINFO.cs" />
+    <Compile Include="SYS_USER_DEPARTMENT.cs" />
+    <Compile Include="SYS_USER_ONLINE.cs" />
+    <Compile Include="SYS_USER_PERMISSION.cs" />
+    <Compile Include="SYS_USER_ROLE.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <EntityDeploy Include="Sql_Wkdb.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>Sql_Wkdb.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="Sql_Wkdb.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>Sql_Wkdb.edmx</DependentUpon>
-      <LastGenOutput>Sql_Wkdb.Context.cs</LastGenOutput>
-    </None>
-    <None Include="Sql_Wkdb.edmx.diagram">
-      <DependentUpon>Sql_Wkdb.edmx</DependentUpon>
-    </None>
-    <None Include="Sql_Wkdb.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>Sql_Wkdb.edmx</DependentUpon>
-      <LastGenOutput>Sql_Wkdb.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
