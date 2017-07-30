@@ -74,6 +74,7 @@
     <Compile Include="IService\SysManage\IDepartmentManage.cs" />
     <Compile Include="IService\SysManage\IModuleManage.cs" />
     <Compile Include="IService\SysManage\IPermissionManage.cs" />
+    <Compile Include="IService\SysManage\IPostManage.cs" />
     <Compile Include="IService\SysManage\IRoleManage.cs" />
     <Compile Include="IService\SysManage\IRolePermissionManage.cs" />
     <Compile Include="IService\SysManage\ISystemManage.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="ServiceImp\SysManage\ModuleManage.cs" />
     <Compile Include="ServiceImp\SysManage\PermissionDistinct.cs" />
     <Compile Include="ServiceImp\SysManage\PermissionManage.cs" />
+    <Compile Include="ServiceImp\SysManage\PostUserManage.cs" />
     <Compile Include="ServiceImp\SysManage\RoleManage.cs" />
     <Compile Include="ServiceImp\SysManage\RolePermissionManage.cs" />
     <Compile Include="ServiceImp\SysManage\SystemManage.cs" />

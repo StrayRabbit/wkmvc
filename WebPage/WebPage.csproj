@@ -197,6 +197,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\ComManage\ComManageAreaRegistration.cs" />
     <Compile Include="Areas\SysManage\Controllers\AccountController.cs" />
+    <Compile Include="Areas\SysManage\Controllers\DepartmentController.cs" />
     <Compile Include="Areas\SysManage\Controllers\HomeController.cs" />
     <Compile Include="Areas\SysManage\Controllers\ModuleController.cs" />
     <Compile Include="Areas\SysManage\Controllers\PermissionController.cs" />
@@ -781,6 +782,8 @@
     <Content Include="Areas\SysManage\Views\Role\Detail.cshtml" />
     <Content Include="Areas\SysManage\Views\Role\RoleCall.cshtml" />
     <Content Include="Areas\SysManage\Views\Permission\PerAllocation.cshtml" />
+    <Content Include="Areas\SysManage\Views\Department\Index.cshtml" />
+    <Content Include="Areas\SysManage\Views\Department\Detail.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

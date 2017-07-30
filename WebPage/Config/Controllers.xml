@@ -32,11 +32,11 @@
     <property name="RolePermissionManage" ref="Service.RolePermission"/>
     <property name="SystemManage" ref="Service.System"/>
     <property name="UserRoleManage" ref="Service.UserRole"/>
-    
-    <!--<property name="ModuleManage" ref="Service.Module"/>
-    <property name="PermissionManage" ref="Service.Permission"/>
-    <property name="UserPermissionManage" ref="Service.UserPermission"/>
-    <property name="CodeManage" ref="Service.Code"/>-->
+  </object>
+  <!--部门管理-->
+  <object type="WebPage.Areas.SysManage.Controllers.DepartmentController,WebPage" singleton="false">
+    <property name="DepartmentManage" ref="Service.Department"/>
+    <property name="PostManage" ref="Service.Post"></property>
   </object>
   <!--系统管理 end-->
 

@@ -27,12 +27,14 @@
   <object id="Service.UserPermission" type="Service.ServiceImp.UserPermissionManage,Service" singleton="false" />
   <object id="Service.Role" type="Service.ServiceImp.RoleManage,Service" singleton="false" />
   <object id="Service.UserRole" type="Service.ServiceImp.UserRoleManage,Service" singleton="false" />
+
+  <object id="Service.Post" type="Service.ServiceImp.PostManage,Service" singleton="false">
+  </object>
   
 
   <!--<object id="Service.UserRole" type="Service.ServiceImp.UserRoleManage,Service" singleton="false">
   </object>
   <object id="Service.PostUser" type="Service.ServiceImp.PostUserManage,Service" singleton="false">
-  </object>
   </object>-->
 
 

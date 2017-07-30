@@ -1,0 +1,76 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model dynamic
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>部门管理</h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-primary btn-xs p210" id="insert" action="add"><i class="fa fa-plus-circle fa-fw"></i> 创建新部门</a>
+                        <a class="btn btn-warning btn-xs p210" id="modify" action="edit"><i class="fa fa-pencil fa-fw"></i> 编辑</a>
+                        <a class="btn btn-danger btn-xs p210" id="delete" action="remove"><i class="fa fa-trash-o fa-fw"></i> 删除</a>
+                        <a class="reload-link" style="color: #c4c4c4" href="javascript:dig.reload()" data-toggle="tooltip" data-placement="left" title="刷新">
+                            <i class="fa fa-repeat fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    @using (Ajax.BeginForm("Index", null, new AjaxOptions() { }, new { @id = "form1", @class = "form-horizontal", @method = "get" }))
+                    {
+                        <div class="row">
+                            <div class="col-sm-9">
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    @Html.TextBox("Search", null, new { @class = "input-sm form-control", @placeholder = "请输入查询关键词" })
+                                    <span class="input-group-btn">
+                                        <button type="submit" onclick="submit()" class="btn btn-sm btn-primary"> 搜索</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        <table id="dataTable" class="table table-striped table-bordered table-hover dataTables-example" style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <th class="tn" style="width: 50px !important"><input name="checkall" class="icheck_box" type="checkbox" value=""></th>
+                                    <th>部门名称</th>
+                                    <th>业务级别</th>
+                                    <th>部门排序</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="tn"><input name="checkbox_name" class="icheck_box" type="checkbox" value="@item.ID"></td>
+                                            <td style="text-align:left">
+                                                <a href="javascript:EditDepart('@item.ID')" listaction="detail" data-toggle="tooltip" data-placement="right" title="修改"> @Html.Raw(item.DepartName)</a>
+                                            </td>
+                                            <td>@item.BUSINESSLEVEL</td>
+                                            <td>@item.SHOWORDER</td>
+                                            <td>@item.CREATEDATE</td>
+                                            <td style="text-align:center;">
+                                                <a href="javascript:AddChild('@item.ID')" listaction="addchild" class="text-navy" title="添加下级部门">[添加下级部门]</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">$(function () { $("#insert").click(function () { dig.addPage("添加新部门", "/sys/department/detail", 600, 450, function () { if (this.returnValue == 'yes') { location.reload() } }) }); $('#modify').click(function () { var vals = ''; var num = 0; $('input[name="checkbox_name"]:checked').each(function () { vals = $(this).val(); num++ }); if (!vals) { dig.error("对不起，请选中您要操作的记录！"); return } if (num > 1) { dig.error("对不起，每次只能修改一条记录！"); return } dig.addPage("编辑部门", "/Sys/department/detail/" + vals, 600, 450, function () { if (this.returnValue == 'yes') { location.reload() } }) }) }); function AddChild(n) { dig.addPage("添加子部门", "/sys/department/detail?parentId=" + n, 600, 450, function () { if (this.returnValue == 'yes') { location.reload() } }) } function EditDepart(n) { dig.addPage("编辑部门", "/sys/department/detail/" + n, 600, 450, function () { if (this.returnValue == 'yes') { location.reload() } }) }</script>
+}
+
