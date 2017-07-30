@@ -26,6 +26,8 @@ namespace WebPage.Areas.SysManage.Controllers
         /// 模块管理
         /// </summary>
         IModuleManage ModuleManage { get; set; }
+        IRolePermissionManage RolePermissionManage { get; set; }
+        IUserPermissionManage UserPermissionManage { get; set; }
         #endregion
 
         [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "View")]
@@ -192,5 +194,51 @@ namespace WebPage.Areas.SysManage.Controllers
             }
             return Json(json);
         }
+
+        /// <summary>
+        /// 删除权限
+        /// </summary>
+        [UserAuthorizeAttribute(ModuleAlias = "Permission", OperaAction = "Remove")]
+        public ActionResult Delete(string idList)
+        {
+            var json = new JsonHelper() { Msg = "删除权限成功", Status = "n" };
+            try
+            {
+                if (!string.IsNullOrEmpty(idList))
+                {
+                    var idList1 = idList.Trim(',').Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(p => int.Parse(p)).ToList();
+                    //判断查找角色是否调用
+                    if (!this.RolePermissionManage.IsExist(p => idList1.Any(e => e == p.PERMISSIONID)))
+                    {
+                        //判断查找用户是否调用
+                        if (!this.UserPermissionManage.IsExist(p => idList1.Any(e => e == p.FK_PERMISSIONID)))
+                        {
+                            this.PermissionManage.Delete(p => idList1.Any(e => e == p.ID));
+                            json.Status = "y";
+                        }
+                        else
+                        {
+                            json.Msg = "有用户正在使用该权限，不能删除!";
+                        }
+                    }
+                    else
+                    {
+                        json.Msg = "有角色正在使用该权限，不能删除!";
+                    }
+                }
+                else
+                {
+                    json.Msg = "未找到要删除的权限记录";
+                }
+                WriteLog(Common.Enums.enumOperator.Remove, "删除权限，结果：" + json.Msg, Common.Enums.enumLog4net.WARN);
+            }
+            catch (Exception e)
+            {
+                json.Msg = e.InnerException.Message;
+                WriteLog(Common.Enums.enumOperator.Remove, "对模块权限按钮的管理删除权限：", e);
+            }
+            return Json(json);
+        }
+
     }
 }

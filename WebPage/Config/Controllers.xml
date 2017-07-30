@@ -21,6 +21,8 @@
     <property name="ModuleManage" ref="Service.Module"/>
     <property name="PermissionManage" ref="Service.Permission"/>
     <property name="SystemManage" ref="Service.System"/>
+    <property name="RolePermissionManage" ref="Service.RolePermission"/>
+    <property name="UserPermissionManage" ref="Service.UserPermission"/>
   </object>
   <!--系统管理 end-->
 

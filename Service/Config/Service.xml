@@ -21,13 +21,13 @@
   <object id="Service.Module" type="Service.ServiceImp.ModuleManage,Service" singleton="false" />
   <object id="Service.System" type="Service.ServiceImp.SystemManage,Service" singleton="false" />
 
+  <object id="Service.RolePermission" type="Service.ServiceImp.RolePermissionManage,Service" singleton="false" />
+  <object id="Service.UserPermission" type="Service.ServiceImp.UserPermissionManage,Service" singleton="false" />
+
   <!--<object id="Service.UserRole" type="Service.ServiceImp.UserRoleManage,Service" singleton="false">
   </object>
-
   <object id="Service.PostUser" type="Service.ServiceImp.PostUserManage,Service" singleton="false">
   </object>
-
-  <object id="Service.UserPermission" type="Service.ServiceImp.UserPermissionManage,Service" singleton="false">
   </object>-->
 
 
