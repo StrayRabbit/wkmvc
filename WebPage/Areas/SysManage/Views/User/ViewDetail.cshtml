@@ -1,0 +1,68 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Domain.COM_DAILYS
+<style type="text/css">
+    body {
+        background: #fff;
+    }
+
+    .day-add-header {
+        background-color: #ed5564;
+        height: 80px;
+        margin-top: -5px;
+        position: relative;
+    }
+
+        .day-add-header h3 {
+            text-align: center;
+            color: #FFFFFF;
+            font-size: 20px;
+            line-height: 50px;
+        }
+
+            .day-add-header h3 i {
+                display: inline-block;
+                margin-left: 5px;
+                position: relative;
+                top: -2px;
+            }
+
+        .day-add-header span {
+            width: 70px;
+            height: 70px;
+            display: block;
+            background-color: #db4453;
+            border-radius: 50%;
+            color: #FFFFFF;
+            position: absolute;
+            top: 45px;
+            left: 47%;
+            text-align: center;
+            font-size: 22px;
+            line-height: 70px;
+        }
+
+    .day-add-txt {
+        margin-top: 50px;
+        text-align: center;
+        background: #fff;
+    }
+
+        .day-add-txt .btn-save {
+            margin-top: 10px;
+        }
+</style>
+
+<div class="day-add-header">
+    <h3>
+        <i class="im-calendar4"></i>&nbsp;@Model.AddDate.ToString("yyyy-M")
+    </h3><span>@(Model.AddDate.Day + "日")</span>
+</div>
+<div class="day-add-txt" style="padding: 5px 15px;">
+    <div style="width:100%;height:320px;text-align:left;">
+        @Html.Raw(ViewData["Content"])
+    </div>
+</div>
+
+

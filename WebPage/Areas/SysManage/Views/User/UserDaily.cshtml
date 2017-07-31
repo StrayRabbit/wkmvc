@@ -1,0 +1,107 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var mweek = Convert.ToInt32(ViewData["week"]);
+    var mmoth = Convert.ToInt32(ViewData["month"]);
+    if (mweek == 7) { mweek = 0; }
+    var daySum = DateTime.DaysInMonth(DateTime.Now.Year, mmoth);
+    var DailyList = ViewData["DailyList"] as List<Domain.COM_DAILYS>;
+}
+<style type="text/css">
+    .ibox-title-panel {
+        margin-left: 10px;
+        float: left;
+        color: #ff0000;
+        font-weight: 600;
+        margin-top: -1px;
+    }
+
+        .ibox-title-panel i {
+            font-size: 15px;
+            margin-top: -6px;
+        }
+</style>
+<link href="/Content/css/daily/dailydate.css" rel="stylesheet" />
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox">
+        <div class="ibox-title clearfix">
+            <a href="/sys/user" class="btn btn-danger btn-sm pull-right"><i class="fa fa-angle-left"></i> 返回员工列表</a>
+            <h5>工作日报</h5>
+            <div class="ibox-title-panel">
+                <i class="fa fa-calendar"></i> @DateTime.Now.Year 年 @mmoth 月
+            </div>
+        </div>
+        <div class="ibox-content clearfix">
+            <div class="f-day-header">
+                <div class="f-day-tab clearfix">
+                    <a href="javascript:void(0)"><i class="fa fa-calendar"></i>工作日报</a>
+                </div>
+            </div>
+            <div class="f-week">
+                <span>周日</span><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span>
+                <a href="@(mmoth > 1 ? "/Sys/User/UserDaily/" + ViewData["id"] + "?month=" + (mmoth - 1) : "javascript:void(0)")" class="l-go" title="上一个月"><i class="fa fa-angle-left"></i></a>
+                <a href="@(mmoth < DateTime.Now.Month ? "/Sys/User/UserDaily/" + ViewData["id"] + "?month=" + (mmoth + 1) : "javascript:void(0)")" class="r-go" title="下一个月"><i class="fa fa-angle-right"></i></a>
+            </div>
+            <div class="f-date clearfix">
+                @{
+                    for (var i = 0; i < mweek; i++)
+                    {
+                        <div class="f-dayitem cur"><span></span></div>
+                    }
+                    for (var i = 1; i < daySum + 1; i++)
+                    {
+                        DateTime tempDate = Convert.ToDateTime(DateTime.Now.Year + "-" + mmoth + "-" + i);
+                        <div class="f-dayitem add">
+                            <span>@(i)</span>
+                            @{
+                                if (tempDate.Date > DateTime.Now.Date)
+                                {
+                                    <div></div>
+                                }
+                                else
+                                {
+                                    var tempData = DailyList.Where(p => p.AddDate.Day == tempDate.Day && p.AddDate.Year == DateTime.Now.Year && p.AddDate.Month == mmoth).FirstOrDefault();
+                                    if (tempDate.Date == DateTime.Now.Date)
+                                    {
+                                        if (tempData != null)
+                                        {
+                                            <div><span class="success viewDaily" data-id="@tempData.ID"><i class="fa fa-check text-navy"></i>查看日报</span></div>
+
+                                        }
+                                        else
+                                        {
+                                            <div><span class="warning"><i class="fa fa-exclamation-triangle"></i>未提交日报</span></div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (tempData != null)
+                                        {
+
+                                            <div><span class="success viewDaily" data-id="@tempData.ID"><i class="fa fa-check text-navy"></i>查看日报</span></div>
+
+                                        }
+                                        else
+                                        {
+                                            <div><span class="warning"><i class="fa fa-exclamation-triangle"></i>未提交日报</span></div>
+                                        }
+                                    }
+                                }
+
+                            }
+                        </div>
+                                }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+       $(function () {
+           $(".viewDaily").click(function () {
+               dig.addPage("查看日报", "/sys/user/viewdetail/" + $(this).attr("data-id"), 1000, 560, function () {
+               });
+           });
+       });
+    </script>
+}

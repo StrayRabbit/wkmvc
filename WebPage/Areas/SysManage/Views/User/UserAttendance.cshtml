@@ -1,0 +1,101 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model dynamic
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>考勤管理</h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-danger btn-xs p210" href="/sys/user"><i class="fa fa-angle-left"></i> 返回员工列表</a>
+                        <a class="reload-link" style="color: #c4c4c4" href="javascript:dig.reload()" data-toggle="tooltip" data-placement="left" title="刷新">
+                            <i class="fa fa-repeat fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    @using (Ajax.BeginForm("UserAttendance/" + ViewData["id"], null, new AjaxOptions() { }, new { @id = "form1", @class = "form-horizontal", @method = "get" }))
+                    {
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <label>选择时间：</label>
+                                <select name="month" class="form-control input-sm  input-s-sm inline" onchange="submit()">
+                                    <option value="" @(ViewData["month"] == null ? "selected=\"selected\"" : "")>本月</option>
+                                    @{
+                                        for (var i = DateTime.Now.AddMonths(-1).Month; i >= 1; i--)
+                                        {
+                                            <option value="@i" @(ViewData["month"] != null && ViewData["month"].ToString() == i.ToString() ? "selected=\"selected\"" : "")>@(DateTime.Now.Year + "年" + i + "月")</option>
+                                        }
+                                    }
+                                </select>
+
+                            </div>
+                            <div class="col-sm-3">
+                            </div>
+                        </div>
+                                        }
+                    <div class="row">
+                        <table id="dataTable" class="table table-striped table-bordered table-hover dataTables-example" style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>上班签到（AM）</th>
+                                    <th>下班签到（AM）</th>
+                                    <th>上班签到（PM）</th>
+                                    <th>下班签到（PM）</th>
+                                    <th>工作时长</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span class="text-danger">@ViewData["UserName"]</span>
+                                    </td>
+                                    <td colspan="5" style="text-align:left;">
+                                        <span class="m-l-sm m-r-sm">签到天数：<span class="text-navy">@ViewData["currentSigDates"]</span> 天</span>
+                                        <span class="m-r-sm">缺勤天数：<span class="text-danger">@ViewData["currentNoSigDates"]</span> 天</span>
+                                        <span class="m-r-sm">迟到：<span class="text-warning">@ViewData["currentLateMinutes"]</span> 分钟</span>
+                                        <span class="m-r-sm">早退：<span class="text-warning">@ViewData["currentEarlyMinutes"]</span> 分钟</span>
+                                    </td>
+                                </tr>
+                                @{foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@Html.Raw(item.Date)</td>
+                                            @{
+                                                if (item.IsOffDuty)
+                                                {
+                                                    <td colspan="5" class="text-center"><span style="color: #999;"><i class="fa fa-exclamation-triangle text-danger m-r-sm"></i>缺勤</span></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.Raw(item.Is_SiginAM ? item.IsLateAM ? "<span class=\" text-navy m-r-sm\"><i class=\"fa fa-check m-r-sm\"></i>已签到</span>迟到<span class=\"text-danger m-r-xs m-l-xs\">" + item.LateAMMinutes + "</span>分钟" : "<span class=\" text-navy\"><i class=\"fa fa-check m-r-sm\"></i>已签到</span>" : "<span class=\"text-danger\"><i class=\"fa fa-close m-r-sm\"></i>未签到</span>")
+                                                    </td>
+                                                    <td>
+                                                        @Html.Raw(item.Is_SigOutAM ? item.IsEarlyOutAM ? "<span class=\" text-navy m-r-sm\"><i class=\"fa fa-check m-r-sm\"></i>已签退</span>早退<span class=\"text-danger m-r-xs m-l-xs\">" + item.EarlyOutAMMinutes + "</span>分钟" : "<span class=\" text-navy\"><i class=\"fa fa-check m-r-sm\"></i>已签退</span>" : "<span class=\"text-danger\"><i class=\"fa fa-close m-r-sm\"></i>未签退</span>")
+                                                    </td>
+                                                    <td>
+                                                        @Html.Raw(item.Is_SiginPM ? item.IsLatePM ? "<span class=\" text-navy m-r-sm\"><i class=\"fa fa-check m-r-sm\"></i>已签到</span>迟到<span class=\"text-danger m-r-xs m-l-xs\">" + item.LatePMMinutes + "</span>分钟" : "<span class=\" text-navy\"><i class=\"fa fa-check m-r-sm\"></i>已签到</span>" : "<span class=\"text-danger\"><i class=\"fa fa-close m-r-sm\"></i>未签到</span>")
+                                                    </td>
+                                                    <td>
+                                                        @Html.Raw(item.Is_SigOutPM ? item.IsEarlyOutPM ? "<span class=\" text-navy m-r-sm\"><i class=\"fa fa-check m-r-sm\"></i>已签退</span>早退<span class=\"text-danger m-r-xs m-l-xs\">" + item.EarlyOutPMMinutes + "</span>分钟" : "<span class=\" text-navy\"><i class=\"fa fa-check m-r-sm\"></i>已签退</span>" : "<span class=\"text-danger\"><i class=\"fa fa-close m-r-sm\"></i>未签退</span>")
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-success">@item.WorkHours 小时</span>
+                                                    </td>
+                                                }
+                                            }
+                                        </tr>
+                                                }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

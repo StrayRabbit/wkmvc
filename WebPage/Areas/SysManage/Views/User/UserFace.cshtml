@@ -1,0 +1,219 @@
+﻿@{
+    ViewBag.Title = "UserFace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Service.Account
+<link href="/Content/js/cropper/cropper.css" rel="stylesheet" />
+<style type="text/css">
+    .preview-lg {
+        width: 263px;
+        height: 148px;
+    }
+
+    .preview-md {
+        width: 139px;
+        height: 78px;
+    }
+
+    .preview-sm {
+        width: 69px;
+        height: 39px;
+    }
+
+    .preview-xs {
+        width: 35px;
+        height: 20px;
+        margin-right: 0;
+    }
+
+    .img-preview {
+        float: left;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+</style>
+<div class="row">
+    <div class="col-md-6">
+        <div class="cropper-container">
+            <img id="faceImg" src="@Model.Face_Img" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h4>图片预览：</h4>
+        <div class="docs-preview clearfix">
+            <div class="img-preview preview-lg"></div>
+            <div class="img-preview preview-md"></div>
+            <div class="img-preview preview-sm"></div>
+            <div class="img-preview preview-xs"></div>
+        </div>
+        <h4 class="m-t-sm">参数：</h4>
+        <div class="row m-t-sm m-l-xs">
+            <span class="btn btn-info m-r-sm">X：<span id="mX"></span> px</span>
+            <span class="btn btn-info m-r-sm">Y：<span id="mY"></span> px</span>
+        </div>
+        <div class="row m-t-sm m-l-xs">
+            <span class="btn btn-primary m-r-sm">宽度：<span id="mW"></span> px</span>
+            <span class="btn btn-primary m-r-sm">高度：<span id="mH"></span> px</span>
+            <span class="btn btn-danger m-r-sm">反转：<span id="mR"></span> deg</span>
+        </div>
+        <div class="docs-buttons">
+            <h4 class="m-t-sm">工具箱：</h4>
+            <div class="row m-t-sm m-l-xs">
+                <div class="btn-group">
+                    <button class="btn btn-white" data-method="zoom" data-option="0.1" type="button">
+                        <i class="fa fa-search-plus"></i>
+                    </button>
+                    <button class="btn btn-white" data-method="zoom" data-option="-0.1" type="button">
+                        <i class="fa fa-search-minus"></i>
+                    </button>
+                    <button class="btn btn-white" data-method="rotate" data-option="-45" type="button">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
+                    <button class="btn btn-white" data-method="rotate" data-option="45" type="button">
+                        <i class="fa fa-rotate-right"></i>
+                    </button>
+                    <button class="btn btn-white" data-method="reset" type="button">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row m-t-sm m-l-xs">
+                <div class="btn-group">
+                    <button class="btn btn-white" type="button" data-method="setAspectRatio" data-option="1.7777777777777777"><i class="fa fa-adn"></i> 16:9</button>
+                    <button class="btn btn-white" type="button" data-method="setAspectRatio" data-option="1.3333333333333333"><i class="fa fa-adn"></i> 4:3</button>
+                    <button class="btn btn-warning" type="button" data-method="setAspectRatio" data-option="1"><i class="fa fa-adn"></i> 1:1</button>
+                    <button class="btn btn-white" type="button" data-method="setAspectRatio" data-option="0.6666666666666666"><i class="fa fa-adn"></i> 2:3</button>
+                    <button class="btn btn-white" type="button" data-method="setAspectRatio" data-option="NaN"><i class="fa fa-adn"></i> 自由伸缩</button>
+                </div>
+            </div>
+            <div class="row m-t-lg m-l-xs">
+                <div class="btn-group">
+                    <a class="btn btn-info single-upload" href="javascript:void(0)">
+                        <i class="fa fa-upload"></i> 上传新头像
+                    </a>
+                    <button class="btn btn-danger" data-method="getCroppedCanvas" type="button">
+                        <i class="fa fa-check"></i> 保存头像
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/cropper/cropper.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            'use strict';
+            (function () {
+                var $image = $('#faceImg'),
+                    options = {
+                        aspectRatio: 1 / 1,
+                        preview: '.img-preview',
+                        crop: function (data) {
+                            $("#mX").html(Math.round(data.x));
+                            $("#mY").html(Math.round(data.y));
+                            $("#mW").html(Math.round(data.height));
+                            $("#mH").html(Math.round(data.width));
+                            $("#mR").html(Math.round(data.rotate));
+                        }
+                    };
+
+                $image.cropper(options);
+
+                $(".btn-group button").click(function () {
+                    $(this).removeClass("btn-white").addClass("btn-warning").siblings().removeClass("btn-warning").addClass("btn-white");
+                });
+
+                $(".single-upload").click(function () {
+                    dig.upload("/upload/images/", function () {
+                        var retval = this.returnValue;
+                        if (retval != '') {
+                            var json = JSON.parse(retval);
+                            $image.cropper('reset').cropper('replace', json.path);
+                        } else {
+                            dig.error("请选择照片!");
+                        }
+                    });
+                });
+
+                $(document.body).on('click', '[data-method]', function () {
+                    var data = $(this).data(),
+                        $target,
+                        result;
+
+                    if (data.method) {
+                        data = $.extend({}, data);
+
+                        if (typeof data.target !== 'undefined') {
+                            $target = $(data.target);
+
+                            if (typeof data.option === 'undefined') {
+                                try {
+                                    data.option = JSON.parse($target.val());
+                                } catch (e) {
+                                    console.log(e.message);
+                                }
+                            }
+                        }
+
+                        result = $image.cropper(data.method, data.option);
+
+                        if (data.method === 'getCroppedCanvas') {
+                            $.post("/sys/user/saveface", { UserFace: result.toDataURL() }, function (res) {
+                                if(res.Status=="y")
+                                {
+                                    dig.successcallback(res.Msg, function () { window.top.location.reload();});
+                                }
+                                else
+                                {
+                                    dig.error(res.Msg);
+                                }
+                            });
+                        }
+
+                        if ($.isPlainObject(result) && $target) {
+                            try {
+                                $target.val(JSON.stringify(result));
+                            } catch (e) {
+                                console.log(e.message);
+                            }
+                        }
+
+                    }
+                }).on('keydown', function (e) {
+
+                    switch (e.which) {
+                        case 37:
+                            e.preventDefault();
+                            $image.cropper('move', -1, 0);
+                            break;
+
+                        case 38:
+                            e.preventDefault();
+                            $image.cropper('move', 0, -1);
+                            break;
+
+                        case 39:
+                            e.preventDefault();
+                            $image.cropper('move', 1, 0);
+                            break;
+
+                        case 40:
+                            e.preventDefault();
+                            $image.cropper('move', 0, 1);
+                            break;
+                    }
+
+                });
+
+
+            }());
+
+        });
+    </script>
+}
+
+
+
+

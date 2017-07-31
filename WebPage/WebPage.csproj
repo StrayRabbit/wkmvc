@@ -792,6 +792,11 @@
     <Content Include="Areas\SysManage\Views\User\Index.cshtml" />
     <Content Include="Areas\SysManage\Views\User\Detail.cshtml" />
     <Content Include="Areas\SysManage\Views\User\UserInfo.cshtml" />
+    <Content Include="Areas\SysManage\Views\User\Contacts.cshtml" />
+    <Content Include="Areas\SysManage\Views\User\UserAttendance.cshtml" />
+    <Content Include="Areas\SysManage\Views\User\UserDaily.cshtml" />
+    <Content Include="Areas\SysManage\Views\User\UserFace.cshtml" />
+    <Content Include="Areas\SysManage\Views\User\ViewDetail.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

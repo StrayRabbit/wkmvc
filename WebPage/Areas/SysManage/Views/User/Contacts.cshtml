@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "Contacts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model dynamic
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        @{foreach (var item in Model)
+            {
+                <div class="col-sm-4">
+                    <div class="contact-box">
+                        <a href="javascript:void(0)">
+                            <div class="col-sm-4">
+                                <div class="text-center">
+                                    <img alt="image" class="img-circle m-t-xs img-responsive" src="@item.FaceImg" style="width:133px;height:133px;" />
+                                    <div class="m-t-xs  text-danger font-bold">@(new Models.CommonHelper().GetUserZW(item.LEVELS))</div>
+                                    <div class="m-t-xs  text-navy">@Html.Raw(item.Depart)</div>
+                                </div>
+                            </div>
+                        </a><div class="col-sm-8">
+                            <h3><strong>@item.NAME</strong></h3>
+                            <p class=" m-t-xs"><i class="fa fa-map-marker fa-fw"></i>@Html.Raw(new Models.CommonHelper().GetCodeAreaName(item.HuJiSuoZaiDi) + "&nbsp;" + item.HUJIPAICHUSUO)</p>
+                            <div class="row">
+                                <div class="col-sm-12 m-t-lg">
+                                    E-mail：@item.Email
+                                </div>
+                                <div class="col-sm-12 m-t-xs">
+                                    手机：@item.Mobile &nbsp; @item.Mobile2
+                                </div>
+                                <div class="col-sm-12 m-t-xs">
+                                    内部邮箱：<a href="/Mail/Mail/WriteMail?toUser=@item.InsideEmail" data-toggle="tooltip" data-placement="top" title="发送内部邮件"><i class="fa fa-envelope-o fa-fw m-l-xs"></i>@item.InsideEmail</a>
+                                </div>
+                                <div class="col-sm-12 m-t-xs">
+                                    电话：@item.Tel
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+    $(function () { $(".contact-box").each(function () { animationHover(this, "pulse") }); });
+    function animationHover(o, e) {
+        o = $(o), o.hover(function () {
+            o.addClass("animated " + e)
+        }, function () {
+            window.setTimeout(function () {
+                o.removeClass("animated " + e)
+            }, 2e3)
+        })
+    }
+    </script>
+}
+
