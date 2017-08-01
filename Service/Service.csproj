@@ -70,6 +70,8 @@
   <ItemGroup>
     <Compile Include="Account.cs" />
     <Compile Include="IRepository.cs" />
+    <Compile Include="IService\ComManage\IContentManage.cs" />
+    <Compile Include="IService\ComManage\IUploadManage.cs" />
     <Compile Include="IService\SysManage\ICodeManage.cs" />
     <Compile Include="IService\SysManage\IDepartmentManage.cs" />
     <Compile Include="IService\SysManage\IModuleManage.cs" />
@@ -86,6 +88,8 @@
     <Compile Include="IService\SysManage\IUserRoleManage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepositoryBase.cs" />
+    <Compile Include="ServiceImp\ComManage\ContentManage.cs" />
+    <Compile Include="ServiceImp\ComManage\UploadManage.cs" />
     <Compile Include="ServiceImp\SysManage\CodeManage.cs" />
     <Compile Include="ServiceImp\SysManage\DepartmentManage.cs" />
     <Compile Include="ServiceImp\SysManage\ModuleManage.cs" />
@@ -113,10 +117,7 @@
       <Name>Domain</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IService\ComManage\" />
-    <Folder Include="ServiceImp\ComManage\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Config\ComService.xml" />
     <EmbeddedResource Include="Config\Service.xml">
@@ -124,6 +125,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

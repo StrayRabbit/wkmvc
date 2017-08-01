@@ -1,0 +1,86 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="/Content/css/admin/skins/flat/red.css" rel="stylesheet" />
+<style type="text/css">
+    .folder-list li.active, .folder-list li:hover, .folder-list li:focus {
+        background: #EFEFEF;
+        padding-left: 8px;
+    }
+</style>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-3 animated fadeInUp">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div class="file-manager">
+                        <a class="btn btn-primary btn-block" href="javascript:dig.upload()" id="upload">上传文件</a>
+                        <div class="hr-line-dashed"></div>
+                        <h5>显示</h5>
+                        <input type="hidden" id="fileExt" value="@ViewData["fileExt"]" />
+                        <ul class="folder-list" style="padding: 0">
+                            <li class="@(ViewData["fileExt"] == null || string.IsNullOrEmpty(ViewData["fileExt"].ToString()) ? "active" : "")">
+                                <a href="/com/upload/home"><i class="fa fa-file  text-danger"></i> 所有文件</a>
+                            </li>
+                            <li class="@(ViewData["fileExt"] != null && ViewData["fileExt"].ToString().ToLower() == "images" ? "active" : "")">
+                                <a href="/com/upload/home?fileExt=images"><i class="fa fa-image text-navy"></i> 图片</a>
+                            </li>
+                            <li class="@(ViewData["fileExt"] != null && ViewData["fileExt"].ToString().ToLower() == "videos" ? "active" : "")">
+                                <a href="/com/upload/home?fileExt=videos"><i class="fa fa-film text-success"></i> 视频</a>
+                            </li>
+                            <li class="@(ViewData["fileExt"] != null && ViewData["fileExt"].ToString().ToLower() == "musics" ? "active" : "")">
+                                <a href="/com/upload/home?fileExt=musics"><i class="fa fa-music text-info"></i> 音频</a>
+                            </li>
+                            <li class="@(ViewData["fileExt"] != null && ViewData["fileExt"].ToString().ToLower() == "files" ? "active" : "")">
+                                <a href="/com/upload/home?fileExt=files"><i class="fa fa-file-word-o text-warning"></i> 文档</a>
+                            </li>
+                            <li class="@(ViewData["fileExt"] != null && ViewData["fileExt"].ToString().ToLower() == "others" ? "active" : "")">
+                                <a href="/com/upload/home?fileExt=others"><i class="fa fa-file-o"></i> 其它文件</a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12" id="filesPanel"></div>
+                <script id="tlist" type="text/x-jquery-tmpl">
+                    <div class="file-box">
+                        <div class="file">
+                            <a href="javascript:void(0)" class="checkselected">
+                                <span class="corner"></span>
+                                {{if isImage }}{{html '<div class="image"><img alt="image" class="img-responsive" src="'+path+'"></div>'}}{{else}}{{html '<div class="icon"><i class="'+icon+'"></i></div>'}}{{/if}}
+                                <div class="file-name">
+                                    <div class="fileTitle">${fullname}</div>
+                                    <br>
+                                    <small>${time}</small>
+                                    <br>
+                                    <small style="color:#f50e8d">${size}</small>
+                                </div>
+                            </a>
+                            <div class="file-trash ibox" style="margin-bottom:0;">
+                                <a href="javascript:filesManage.showFilePath('${path}')"><i class="fa fa-folder-open-o"></i></a>
+                                <a href="javascript:filesManage.delFiles('${path}')" action="Remove"><i class="fa fa-trash-o"></i></a>
+                            </div>
+                        </div>
+                        <div class="file-checkbox"><input name="check_files" type="checkbox" class="icheck_box" value="${path}" /> </div>
+                    </div>
+                </script>
+                <div class="fileToolsRight animated fadeInUp text-center ibox">
+                    <a href="javascript:filesManage.copyFiles()" action="Copy" class="btn-circle btn btn-primary btn-lg" data-toggle="tooltip" data-placement="left" title="" data-original-title="复制"><i class="fa fa-copy"></i></a>
+                    <a href="javascript:filesManage.moveFiles()" action="Cut" class="btn-circle btn btn-warning btn-lg" data-toggle="tooltip" data-placement="left" title="" data-original-title="移动"><i class="fa fa-cut"></i></a>
+                    <a href="javascript:filesManage.delMoreFiles()" action="Remove" class="btn-circle btn btn-danger btn-lg" data-toggle="tooltip" data-placement="left" title="" data-original-title="删除"><i class="fa fa-trash-o"></i></a>
+                    <a href="javascript:filesManage.compressFiles()" action="Compress" class="btn-circle btn btn-info btn-lg" data-toggle="tooltip" data-placement="left" title="" data-original-title="压缩"><i class="fa fa-compress"></i></a>
+                    <a href="javascript:filesManage.expandFiles()" action="Expand" class="btn-circle btn btn-white btn-lg" data-toggle="tooltip" data-placement="left" title="" data-original-title="解压"><i class="fa fa-expand"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="/Content/js/files/content.min.js"></script>
+}
+

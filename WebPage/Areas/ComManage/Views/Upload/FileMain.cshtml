@@ -1,0 +1,104 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .gray-bg {
+        background-color: #fff;
+    }
+
+    .filesPanel > div {
+        display: block;
+        text-align: center;
+        overflow: hidden;
+        padding: 15px 0;
+    }
+
+        .filesPanel > div:hover {
+            background: #F9F9F9;
+        }
+
+    .filesPanel a:focus, .filesPanel a:hover {
+        outline: 0;
+        color: #ec4758;
+    }
+
+    .filesPanel .icon {
+        margin-bottom: 10px;
+    }
+
+        .filesPanel .icon i {
+            font-size: 35px;
+        }
+
+    .filesPanel .filename, .filesPanel .filesize {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filesPanel .filesize {
+        font-size: 12px;
+        color: #A9A1A1;
+    }
+</style>
+<div class="wrapper">
+    <div class="ibox-content">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <div class="input-group">
+                    <input id="spath" type="hidden" value="@ViewData["spath"]" />
+                    <input id="path" type="text" class="form-control" value="/upload/" disabled />
+                    <span class="input-group-btn"><button type="button" class="btn btn-white btn-higher-up" disabled><i class="fa fa-reply-all"></i> 上级目录</button></span>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group" style="height:195px;overflow-x:hidden;overflow-y:auto;">
+                <div id="filesPanel" class="row filesPanel" style="margin:0;"></div>
+                <script id="tlist" type="text/x-jquery-tmpl">
+                    <div class="col-xs-3">
+                        <a href="{{if isfolder }}{{html 'javascript:signfiles.OpenFolder(\''+name+'\')'}}{{else}}{{html 'javascript:signfiles.SetFile(\''+fullname+'\',\''+ext+'\',\''+size+'\',\''+name+ext+'\')'}}{{/if}}">
+                            <div class="col-xs-12 icon">
+                                <i class="${icon}"></i>
+                            </div>
+                            <div class="col-xs-12 filename">${name}</div>
+                            <div class="col-xs-12 filesize">${size}</div>
+                        </a>
+                    </div>
+                </script>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group">
+                <label class="col-xs-2 control-label">Url地址：</label>
+                <form action="/Com/Upload/SignUpFile" id="forms" method="post">
+                    <div class="col-xs-10">
+                        <div class="input-group">
+                            <input type="text" id="fileUrl" class="form-control" />
+                            <input type="hidden" id="jsons" />
+                            <span class="input-group-btn"><button type="button" class="btn btn-danger sign-upload"><i class="fa fa-upload"></i> 上传文件</button></span>
+                        </div>
+                    </div>
+                    <input type="file" id="fileUp" name="fileUp" onchange="signfiles.signUpFile('')" style="display:none;" />
+                </form>
+            </div>
+            <div class="form-group">
+                <label class="col-xs-2 control-label">上传选项：</label>
+                <div class="col-xs-10">
+                    <div class="col-xs-3">
+                        <label class="jswitch_line"><input type="checkbox" id="isThumbnail" class="js-switch" /> 缩略图</label>
+                    </div>
+                    <div class="col-xs-3"><label class="jswitch_line"><input type="checkbox" id="isWater" class="js-switch" /> 水印</label></div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-primary btn-save" type="button"><i class="fa fa-check"></i> <span>确定保存</span></button>
+                <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="/Content/js/jquery.form.min.js"></script>
+    <script type="text/javascript" src="/Content/js/files/files.js"></script>
+}
+
