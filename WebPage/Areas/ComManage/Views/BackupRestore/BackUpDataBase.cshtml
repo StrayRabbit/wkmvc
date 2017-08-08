@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .gray-bg {
+        background-color: #fff;
+    }
+</style>
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="ibox-detail-title">
+            <i class="fa fa-database"></i>备份数据
+        </div>
+        <div class="ibox-content">
+            <div class="row">
+                <div class="form-group">
+                    <input type="hidden" id="Url" value="/Com/BackupRestore/BackUpData" />
+                    <label class="col-xs-2 control-label"></label>
+                    <div class="col-xs-10">
+                        此操作，可能需要等待较长时间，请耐心等候...
+                    </div>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="text-center">
+                <button class="btn btn-primary btn-save" type="button"><i class="fa fa-lastfm"></i> <span>开始备份</span></button>
+                <button class="btn btn-warning" id="btn-dig-close" type="button"><i class="fa fa-reply-all"></i> 取消返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="/Content/js/files/backup.js"></script>
+}
+

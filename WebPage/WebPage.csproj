@@ -196,6 +196,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\ComManage\ComManageAreaRegistration.cs" />
+    <Compile Include="Areas\ComManage\Controllers\BackupRestoreController.cs" />
     <Compile Include="Areas\ComManage\Controllers\UploadController.cs" />
     <Compile Include="Areas\ComManage\Models\FileModel.cs" />
     <Compile Include="Areas\ComManage\Models\Thumbnail.cs" />
@@ -806,6 +807,10 @@
     <Content Include="Areas\ComManage\Views\Upload\Cut.cshtml" />
     <Content Include="Areas\ComManage\Views\Upload\Copy.cshtml" />
     <Content Include="Areas\ComManage\Views\Upload\Compress.cshtml" />
+    <Content Include="Areas\ComManage\Views\BackupRestore\BackUpApplication.cshtml" />
+    <Content Include="Areas\ComManage\Views\BackupRestore\BackUpDataBase.cshtml" />
+    <Content Include="Areas\ComManage\Views\BackupRestore\Index.cshtml" />
+    <Content Include="Areas\ComManage\Views\BackupRestore\Restore.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

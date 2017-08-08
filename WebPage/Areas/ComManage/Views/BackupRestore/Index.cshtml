@@ -1,0 +1,147 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>数据备份</h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-info btn-xs p210" id="backupapplication" action="BackUpApplication"><i class="fa fa-cubes fa-fw"></i> 备份程序</a>
+                        <a class="btn btn-primary btn-xs p210" id="backupdatabase" action="BackUpDataBase"><i class="fa fa-database fa-fw"></i> 备份数据</a>
+                        <a class="btn btn-danger btn-xs p210" id="delete" action="remove"><i class="fa fa-trash-o fa-fw"></i> 删除备份</a>
+                        <a class="reload-link" style="color: #c4c4c4" href="javascript:dig.reload()" data-toggle="tooltip" data-placement="left" title="刷新">
+                            <i class="fa fa-repeat fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <label>备份类型：</label>
+                            <div class="btn-group">
+                                <button class="btn btn-warning" type="button" data-type="*"><i class="fa fa-adn"></i> 全部</button>
+                                <button class="btn btn-white" type="button" data-type=".zip"><i class="fa fa-cubes"></i> 程序备份</button>
+                                <button class="btn btn-white" type="button" data-type=".bak"><i class="fa fa-database"></i> 数据备份</button>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-3">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <table id="dataTable" class="table table-striped table-bordered table-hover dataTables-example" style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <th class="tn" style="width: 50px !important"></th>
+                                    <th>备份名称</th>
+                                    <th>备份类型</th>
+                                    <th>备份大小</th>
+                                    <th>备份时间</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <script id="tlist" type="text/x-jquery-tmpl">
+                            <tr>
+                                <td class="tn" style="width: 50px !important"><input name="check_files" type="checkbox" class="icheck_box" value="${path}" /></td>
+                                <td>${name}</td>
+                                <td>{{if ext==".zip" }}{{html '程序备份'}}{{else}}{{html '数据备份'}}{{/if}}</td>
+                                <td>${size}</td>
+                                <td>${time}</td>
+                            </tr>
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript" src="/Content/js/jquery.tmpl.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            ShowFiles('');
+            //类型切换
+            $(".btn-group button").click(function () {
+                $(this).removeClass("btn-white").addClass("btn-warning").siblings().removeClass("btn-warning").addClass("btn-white");
+                ShowFiles($(this).attr("data-type"));
+            });
+            //程序备份
+            $("#backupapplication").click(function () {
+                dig.addPage("备份程序", "/Com/BackupRestore/BackUpApplication", 600, 250, function () {
+                    if (this.returnValue == 'yes') {
+                        location.reload();
+                    }
+                });
+            });
+            //数据备份
+            $("#backupdatabase").click(function () {
+                dig.addPage("数据备份", "/Com/BackupRestore/BackUpDataBase", 600, 250, function () {
+                    if (this.returnValue == 'yes') {
+                        location.reload();
+                    }
+                });
+            });
+            //删除备份
+            $("#delete").click(function () {
+                var vals = '';
+                $('input[name="check_files"]:checked').each(function () {
+                    vals += $(this).val() + ';';
+                });
+                if (vals == '' || vals == ';') {
+                    dig.error("对不起，请选中您要操作的文件！");
+                    return;
+                }
+                dig.confirm("删除确认", "删除后不可恢复,确定删除吗？", function () {
+                    $.post("/Com/BackupRestore/DeleteBy", { path: vals }, function (res) {
+                        if (res.Status == "y")
+                            location.reload();
+                        else {
+                            dig.error(res.Msg);
+                        }
+                    }, "json");
+                });
+            });
+
+        });
+        function ShowFiles(n)
+        {
+            $("#dataTable>tbody").html('<tr><td colspan="5" ><div class="sk-spinner sk-spinner-cube-grid"><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div></div></td></tr>');
+            $.post("/Com/BackupRestore/GetBackUpData", { fileExt: n }, function (res) {
+                if (res.Status == "y") {
+                    if (res.Data == "" || res.Data == null) {
+                        $("#dataTable>tbody").html('<tr><td colspan="5" class="alert alert-warning text-center"><span style="font-size:16px;"><i class="fa fa-warning"></i>&nbsp;没有找到任何文件</span></td></tr>');
+                    } else {
+                        $("#dataTable>tbody").empty();
+                        $("#tlist").tmpl(res.Data).appendTo('#dataTable>tbody');
+                        $(".icheck_box").iCheck({
+                            checkboxClass: 'icheckbox_minimal-red',
+                            radioClass: 'iradio_minimal-red',
+                            increaseArea: '20%' // optional
+                        });
+                        //点击表格，选中/取消 复选框
+                        $("#dataTable tr").slice(1).each(function (g) {
+                            var p = $(this);
+                            $(this).children().slice(1).click(function () {
+                                if ($($(p.children()[0]).children()[0]).children().eq(0).prop("checked")) {
+                                    $($(p.children()[0]).children()[0]).iCheck("uncheck");
+                                }
+                                else {
+                                    $($(p.children()[0]).children()[0]).iCheck("check");
+                                }
+                            });
+                        });
+                    }
+                } else if (res.Status == "empty") {
+                    $("#dataTable>tbody").html('<tr><td colspan="5" class="alert alert-warning text-center"><span style="font-size:16px;"><i class="fa fa-warning"></i>&nbsp;没有找到任何文件</span></td></tr>');
+                }
+                else {
+                    $("#dataTable>tbody").html('<tr><td colspan="5" class="alert alert-warning text-center"><span style="font-size:16px;"><i class="fa fa-warning"></i>&nbsp;' + res.Msg + '</span></td></tr>');
+                }
+            }, "json");
+        }
+    </script>
+}
+
